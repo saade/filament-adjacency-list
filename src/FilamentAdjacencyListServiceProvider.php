@@ -1,6 +1,6 @@
 <?php
 
-namespace VendorName\Skeleton;
+namespace Saade\FilamentAdjacencyList;
 
 use Filament\Support\Assets\AlpineComponent;
 use Filament\Support\Assets\Asset;
@@ -14,14 +14,14 @@ use Livewire\Features\SupportTesting\Testable;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use VendorName\Skeleton\Commands\SkeletonCommand;
-use VendorName\Skeleton\Testing\TestsSkeleton;
+use Saade\FilamentAdjacencyList\Commands\FilamentAdjacencyListCommand;
+use Saade\FilamentAdjacencyList\Testing\TestsFilamentAdjacencyList;
 
-class SkeletonServiceProvider extends PackageServiceProvider
+class FilamentAdjacencyListServiceProvider extends PackageServiceProvider
 {
-    public static string $name = 'skeleton';
+    public static string $name = 'filament-adjacency-list';
 
-    public static string $viewNamespace = 'skeleton';
+    public static string $viewNamespace = 'filament-adjacency-list';
 
     public function configurePackage(Package $package): void
     {
@@ -37,7 +37,7 @@ class SkeletonServiceProvider extends PackageServiceProvider
                     ->publishConfigFile()
                     ->publishMigrations()
                     ->askToRunMigrations()
-                    ->askToStarRepoOnGitHub(':vendor_slug/:package_slug');
+                    ->askToStarRepoOnGitHub('saade/filament-adjacency-list');
             });
 
         $configFileName = $package->shortName();
@@ -83,18 +83,18 @@ class SkeletonServiceProvider extends PackageServiceProvider
         if (app()->runningInConsole()) {
             foreach (app(Filesystem::class)->files(__DIR__ . '/../stubs/') as $file) {
                 $this->publishes([
-                    $file->getRealPath() => base_path("stubs/skeleton/{$file->getFilename()}"),
-                ], 'skeleton-stubs');
+                    $file->getRealPath() => base_path("stubs/filament-adjacency-list/{$file->getFilename()}"),
+                ], 'filament-adjacency-list-stubs');
             }
         }
 
         // Testing
-        Testable::mixin(new TestsSkeleton());
+        Testable::mixin(new TestsFilamentAdjacencyList());
     }
 
     protected function getAssetPackageName(): ?string
     {
-        return ':vendor_slug/:package_slug';
+        return 'saade/filament-adjacency-list';
     }
 
     /**
@@ -103,9 +103,9 @@ class SkeletonServiceProvider extends PackageServiceProvider
     protected function getAssets(): array
     {
         return [
-            // AlpineComponent::make('skeleton', __DIR__ . '/../resources/dist/components/skeleton.js'),
-            Css::make('skeleton-styles', __DIR__ . '/../resources/dist/skeleton.css'),
-            Js::make('skeleton-scripts', __DIR__ . '/../resources/dist/skeleton.js'),
+            // AlpineComponent::make('filament-adjacency-list', __DIR__ . '/../resources/dist/components/filament-adjacency-list.js'),
+            Css::make('filament-adjacency-list-styles', __DIR__ . '/../resources/dist/filament-adjacency-list.css'),
+            Js::make('filament-adjacency-list-scripts', __DIR__ . '/../resources/dist/filament-adjacency-list.js'),
         ];
     }
 
@@ -115,7 +115,7 @@ class SkeletonServiceProvider extends PackageServiceProvider
     protected function getCommands(): array
     {
         return [
-            SkeletonCommand::class,
+            FilamentAdjacencyListCommand::class,
         ];
     }
 
@@ -149,7 +149,7 @@ class SkeletonServiceProvider extends PackageServiceProvider
     protected function getMigrations(): array
     {
         return [
-            'create_skeleton_table',
+            'create_filament-adjacency-list_table',
         ];
     }
 }
