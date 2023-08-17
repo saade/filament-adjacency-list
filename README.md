@@ -1,13 +1,13 @@
-# A Filament package to adjacency lists.
+# Filament Adjacency List
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/saade/filament-adjacency-list.svg?style=flat-square)](https://packagist.org/packages/saade/filament-adjacency-list)
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/saade/filament-adjacency-list/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/saade/filament-adjacency-list/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/saade/filament-adjacency-list/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/saade/filament-adjacency-list/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/saade/filament-adjacency-list.svg?style=flat-square)](https://packagist.org/packages/saade/filament-adjacency-list)
 
+A Filament package to adjacency lists.
 
-
-This is where your description should go. Limit it to a paragraph or two. Consider adding a small example.
+<center>
+    <img src="art/cover.png" width="1024"/>
+</center>
 
 ## Installation
 
@@ -17,44 +17,51 @@ You can install the package via composer:
 composer require saade/filament-adjacency-list
 ```
 
-You can publish and run the migrations with:
-
-```bash
-php artisan vendor:publish --tag="filament-adjacency-list-migrations"
-php artisan migrate
-```
-
-You can publish the config file with:
-
-```bash
-php artisan vendor:publish --tag="filament-adjacency-list-config"
-```
-
-Optionally, you can publish the views using
-
-```bash
-php artisan vendor:publish --tag="filament-adjacency-list-views"
-```
-
-This is the contents of the published config file:
-
-```php
-return [
-];
-```
-
 ## Usage
 
 ```php
-$filamentAdjacencyList = new Saade\FilamentAdjacencyList();
-echo $filamentAdjacencyList->echoPhrase('Hello, Saade!');
+use Saade\FilamentAdjacencyList\AdjacencyList;
+
+AdjacencyList::make('subjects')
+    ->form([
+        Forms\Components\TextInput::make('label')
+            ->required(),
+    ])
 ```
 
-## Testing
-
-```bash
-composer test
+## Configuration
+### Customizing the `label` and `children` keys.
+```php
+AdjacencyList::make('subjects')
+    ->labelKey('name')          // defaults to 'label'
+    ->childrenKey('subitems')   // defaults to 'children'
 ```
+
+### Creating items without a modal.
+```php
+AdjacencyList::make('subjects')
+    ->modal(false)      // defaults to true
+```
+
+### Disabling creation, edition, deletion, and reordering.
+```php
+AdjacencyList::make('subjects')
+    ->addable(false)
+    ->editable(false)
+    ->deletable(false)
+    ->reorderable(false)
+```
+
+### Customizing actions
+```php
+use Filament\Forms\Actions\Action;
+
+AdjacencyList::make('subjects')
+    ->addAction(fn (Action $action): Action => $action->icon('heroicon-o-plus')->color('primary'))
+    ->addChildAction(fn (Action $action): Action => $action->button())
+    ->editAction(fn (Action $action): Action => $action->icon('heroicon-o-pencil'))
+    ->deleteAction(fn (Action $action): Action => $action->requiresConfirmation())
+``````
 
 ## Changelog
 

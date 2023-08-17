@@ -1,6 +1,3 @@
 <?php
 
-// config for Saade/FilamentAdjacencyList
-return [
-
-];
+return [];
