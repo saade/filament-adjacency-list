@@ -3,11 +3,10 @@
 namespace Saade\FilamentAdjacencyList\Foms\Components;
 
 use Closure;
-use Filament\Forms\Components\Actions\Action;
 use Filament\Forms;
+use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Form;
 use Filament\Support\Enums\ActionSize;
-use Illuminate\Support\Composer;
 use Illuminate\Support\Str;
 
 class AdjacencyList extends Forms\Components\Field
@@ -45,7 +44,7 @@ class AdjacencyList extends Forms\Components\Field
         parent::setUp();
 
         $this->afterStateHydrated(function (AdjacencyList $component, ?array $state) {
-            if (!$state) {
+            if (! $state) {
                 $component->state([]);
             }
         });
@@ -75,19 +74,19 @@ class AdjacencyList extends Forms\Components\Field
                         $items[$uuid] = $item;
                     }
 
-                    if (!$targetStatePath) {
+                    if (! $targetStatePath) {
                         $state = $items;
                     } else {
                         data_set($state, $targetStatePath, $items);
                     }
 
                     $component->state($state);
-                }
-            ]
+                },
+            ],
         ]);
     }
 
-    public function labelKey(string| Closure $key): static
+    public function labelKey(string | Closure $key): static
     {
         $this->labelKey = $key;
 
@@ -99,7 +98,7 @@ class AdjacencyList extends Forms\Components\Field
         return $this->evaluate($this->labelKey);
     }
 
-    public function childrenKey(string| Closure $key): static
+    public function childrenKey(string | Closure $key): static
     {
         $this->childrenKey = $key;
 
@@ -136,7 +135,7 @@ class AdjacencyList extends Forms\Components\Field
             ->size(ActionSize::Small)
             ->visible(fn (): bool => $this->isAddable());
 
-        if (!$this->hasModal()) {
+        if (! $this->hasModal()) {
             $action->form(null);
         }
 
@@ -176,7 +175,7 @@ class AdjacencyList extends Forms\Components\Field
                     data_set($items, ("$statePath." . $this->getChildrenKey() . ".$uuid"), [
                         $this->getLabelKey() => __('filament-adjacency-list::adjacency-list.items.untitled'),
                         $this->getChildrenKey() => [],
-                        ...$data
+                        ...$data,
                     ]);
 
                     $component->state($items);
@@ -185,7 +184,7 @@ class AdjacencyList extends Forms\Components\Field
             ->size(ActionSize::ExtraSmall)
             ->visible(fn (): bool => $this->isAddable());
 
-        if (!$this->hasModal()) {
+        if (! $this->hasModal()) {
             $action->form(null);
         }
 
@@ -310,7 +309,7 @@ class AdjacencyList extends Forms\Components\Field
             ]);
         }
 
-        if (is_array($modifiedForm) && (!count($modifiedForm))) {
+        if (is_array($modifiedForm) && (! count($modifiedForm))) {
             return null;
         }
 

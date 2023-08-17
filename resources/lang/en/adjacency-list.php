@@ -8,8 +8,8 @@ return [
                 'heading' => 'Add item',
                 'actions' => [
                     'create' => 'Create',
-                ]
-            ]
+                ],
+            ],
         ],
 
         'add-child' => [
@@ -18,8 +18,8 @@ return [
                 'heading' => 'Add child',
                 'actions' => [
                     'create' => 'Create',
-                ]
-            ]
+                ],
+            ],
         ],
 
         'edit' => [
@@ -28,8 +28,8 @@ return [
                 'heading' => 'Edit item',
                 'actions' => [
                     'save' => 'Save',
-                ]
-            ]
+                ],
+            ],
         ],
 
         'delete' => [
@@ -38,8 +38,8 @@ return [
                 'heading' => 'Delete item',
                 'actions' => [
                     'confirm' => 'Confirm',
-                ]
-            ]
+                ],
+            ],
         ],
 
         'toggle-children' => [
