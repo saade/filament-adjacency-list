@@ -3,8 +3,8 @@
 namespace Saade\FilamentAdjacencyList\Foms\Components\Concerns;
 
 use Closure;
-use Filament\Forms\Form;
 use Filament\Forms;
+use Filament\Forms\Form;
 
 trait HasForm
 {
@@ -21,7 +21,7 @@ trait HasForm
 
     public function getForm(Form $form): ?Form
     {
-        if (!$this->hasModal()) {
+        if (! $this->hasModal()) {
             return null;
         }
 
@@ -34,7 +34,7 @@ trait HasForm
             ]);
         }
 
-        if (is_array($modifiedForm) && (!count($modifiedForm))) {
+        if (is_array($modifiedForm) && (! count($modifiedForm))) {
             return null;
         }
 

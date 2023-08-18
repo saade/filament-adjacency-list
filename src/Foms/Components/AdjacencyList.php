@@ -6,7 +6,6 @@ use Closure;
 use Filament\Forms;
 use Filament\Forms\Components\Actions\Action;
 use Illuminate\Support\Str;
-use Saade\FilamentAdjacencyList\Foms\Components\Concerns;
 
 class AdjacencyList extends Forms\Components\Field
 {
@@ -24,7 +23,7 @@ class AdjacencyList extends Forms\Components\Field
         parent::setUp();
 
         $this->afterStateHydrated(function (AdjacencyList $component, ?array $state) {
-            if (!$state) {
+            if (! $state) {
                 $component->state([]);
             }
         });
@@ -55,7 +54,7 @@ class AdjacencyList extends Forms\Components\Field
                         $items[$uuid] = $item;
                     }
 
-                    if (!$targetStatePath) {
+                    if (! $targetStatePath) {
                         $state = $items;
                     } else {
                         data_set($state, $targetStatePath, $items);
