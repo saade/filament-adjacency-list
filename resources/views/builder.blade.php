@@ -54,7 +54,7 @@
             @empty
                 <div @class([
                     'w-full bg-white rounded-lg border border-gray-300 px-3 py-2 text-left',
-                    'dark:bg-gray-700 dark:border-gray-600',
+                    'dark:bg-gray-900 dark:border-white/10',
                 ])>
                     {{ __('filament-adjacency-list::adjacency-list.items.empty') }}
                 </div>

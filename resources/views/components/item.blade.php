@@ -16,7 +16,7 @@
     <div class="relative group">
         <div @class([
             'bg-white rounded-lg border border-gray-300 w-full flex justify-between',
-            'dark:bg-gray-700 dark:border-gray-600',
+            'dark:bg-gray-900 dark:border-white/10',
         ])>
             <div class="flex w-full">
                 @if($reorderable)
@@ -26,7 +26,7 @@
                         title="{{ __('filament-adjacency-list::adjacency-list.actions.reorder.label') }}"
                         @class([
                             'flex items-center bg-gray-50 rounded-l-lg border-r border-gray-300 px-1',
-                            'dark:bg-gray-800 dark:border-gray-600',
+                            'dark:bg-gray-800 dark:border-white/10',
                         ])
                     >
                         @svg('heroicon-o-ellipsis-vertical', 'text-gray-400 w-4 h-4 -mr-2')
