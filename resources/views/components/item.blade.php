@@ -41,7 +41,7 @@
                         title="{{ __('filament-adjacency-list::adjacency-list.actions.toggle-children.label') }}"
                         x-on:click="open = !open"
                     >
-                        @svg('heroicon-o-chevron-right','w-3.5 h-3.5 transition ease-in-out duration-200 rtl:rotate-180', ['x-bind:class' => "{'ltr:rotate-90 rtl:!rotate-90': open}"])
+                        @svg('heroicon-o-chevron-right', 'w-3.5 h-3.5 transition ease-in-out duration-200 rtl:rotate-180', ['x-bind:class' => "{'ltr:rotate-90 rtl:!rotate-90': open}"])
                     </button>
                 @endif
 
