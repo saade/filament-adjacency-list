@@ -61,7 +61,12 @@ AdjacencyList::make('subjects')
     ->addChildAction(fn (Action $action): Action => $action->button())
     ->editAction(fn (Action $action): Action => $action->icon('heroicon-o-pencil'))
     ->deleteAction(fn (Action $action): Action => $action->requiresConfirmation())
-``````
+    ->reorderAction(fn (Action $action): Action => $action->icon('heroicon-o-arrow-path-rounded-square'))
+```
+> [!IMPORTANT]
+> **Reorder Action**
+> If you want to add `->extraAttributes()` to the action, you need to add the `['data-sortable-handle' => 'true']` attribute to the array.
+> if you want to trigger a livewire action on click, you need to chain `->livewireClickHandlerEnabled()` on the action.
 
 ## Changelog
 

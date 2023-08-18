@@ -8,7 +8,7 @@
     wire:key="{{ $itemStatePath }}"
 >
     @php
-        [$addChildAction, $deleteAction, $editAction] = $actions;
+        [$addChildAction, $deleteAction, $editAction, $reorderAction] = $actions;
 
         $hasChildren = count($item[$childrenKey]) > 0;
     @endphp
@@ -20,18 +20,12 @@
         ])>
             <div class="flex w-full">
                 @if($reorderable)
-                    <button
-                        data-sortable-handle
-                        type="button"
-                        title="{{ __('filament-adjacency-list::adjacency-list.actions.reorder.label') }}"
-                        @class([
-                            'flex items-center bg-gray-50 rounded-l-lg rtl:rounded-r-lg border-r rtl:border-r-0 rtl:border-l border-gray-300 px-1',
-                            'dark:bg-gray-800 dark:border-white/10',
-                        ])
-                    >
-                        @svg('heroicon-o-ellipsis-vertical', 'text-gray-400 w-4 h-4 ltr:-mr-2 rtl:-ml-2')
-                        @svg('heroicon-o-ellipsis-vertical', 'text-gray-400 w-4 h-4')
-                    </button>
+                    <div @class([
+                        'flex items-center bg-gray-50 rounded-l-lg rtl:rounded-r-lg border-r rtl:border-r-0 rtl:border-l border-gray-300 px-1',
+                        'dark:bg-gray-800 dark:border-white/10',
+                    ])>
+                        {{ ($reorderAction)(['statePath' => $itemStatePath]) }}
+                    </div>
                 @endif
 
                 @if ($hasChildren)
