@@ -21,7 +21,8 @@
         $itemActions = [
             $getAction('addChild'),
             $getAction('delete'),
-            $getAction('edit')
+            $getAction('edit'),
+            $getAction('reorder')
         ];
     @endphp
 
