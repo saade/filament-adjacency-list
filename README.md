@@ -78,6 +78,7 @@ Please review [our security policy](../../security/policy) on how to report secu
 ## Credits
 
 - [Saade](https://github.com/saade)
+- [Ryan Chandler's Navigation PLugin](https://github.com/ryangjchandler) for the inspiration.
 - [All Contributors](../../contributors)
 
 ## License
