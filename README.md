@@ -5,9 +5,9 @@
 
 A Filament package to manage adjacency lists (aka trees).
 
-<center>
-    <img src="art/cover.png" width="1024"/>
-</center>
+<p align="center">
+    <img src="art/cover.png" alt="Banner" style="width: 100%; max-width: 800px;" />
+</p>
 
 ## Installation
 
@@ -83,3 +83,10 @@ Please review [our security policy](../../security/policy) on how to report secu
 ## License
 
 The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
+
+<br><br>
+<p align="center">
+    <a href="https://github.com/sponsors/saade">
+        <img src="art/sponsor.png" alt="Sponsor Saade" style="width: 100%; max-width: 800px;" />
+    </a>
+</p>
