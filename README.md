@@ -92,7 +92,6 @@ Please review [our security policy](../../security/policy) on how to report secu
 
 The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
 
-<br><br>
 <p align="center">
     <a href="https://github.com/sponsors/saade">
         <img src="https://raw.githubusercontent.com/saade/filament-adjacency-list/3.x/art/sponsor.png" alt="Sponsor Saade" style="width: 100%; max-width: 800px;" />
