@@ -23,8 +23,6 @@ class ReorderAction extends Action
 
         $this->livewireClickHandlerEnabled(false);
 
-        $this->extraAttributes(['data-sortable-handle' => 'true']);
-
         $this->size(ActionSize::Small);
 
         $this->visible(

@@ -2,13 +2,17 @@
 
 namespace Saade\FilamentAdjacencyList\Foms\Components\Actions;
 
+use Filament\Actions\Concerns\InteractsWithRecord;
+use Filament\Actions\Contracts\HasRecord;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Form;
 use Filament\Support\Enums\ActionSize;
 use Saade\FilamentAdjacencyList\Foms\Components\AdjacencyList;
 
-class EditAction extends Action
+class EditAction extends Action implements HasRecord
 {
+    use InteractsWithRecord;
+
     public static function getDefaultName(): ?string
     {
         return 'edit';
@@ -45,14 +49,47 @@ class EditAction extends Action
             fn (AdjacencyList $component, Form $form) => $component->getForm($form)
         );
 
-        $this->mountUsing(
-            fn (AdjacencyList $component, Form $form, array $arguments) => $form->fill(
-                data_get($component->getState(), $component->getRelativeStatePath($arguments['statePath']), [])
-            )
+        $this->fillForm(
+            function (AdjacencyList $component, array $arguments) {
+                return data_get($component->getState(), $component->getRelativeStatePath($arguments['statePath']), []);
+            }
+        );
+
+        $this->record(
+            fn (AdjacencyList $component, array $arguments) =>
+            $component->getCachedExistingRecords()->firstWhere($component->getCustomPath(), $component->getRelativeStatePath($arguments['statePath']))
         );
 
         $this->visible(
             fn (AdjacencyList $component): bool => $component->isEditable()
         );
+    }
+
+    /**
+     * @return array<mixed>
+     */
+    protected function resolveDefaultClosureDependencyForEvaluationByName(string $parameterName): array
+    {
+        return match ($parameterName) {
+            'record' => [$this->getRecord()],
+            default => parent::resolveDefaultClosureDependencyForEvaluationByName($parameterName),
+        };
+    }
+
+    /**
+     * @return array<mixed>
+     */
+    protected function resolveDefaultClosureDependencyForEvaluationByType(string $parameterType): array
+    {
+        $record = $this->getRecord();
+
+        if (!$record) {
+            return parent::resolveDefaultClosureDependencyForEvaluationByType($parameterType);
+        }
+
+        return match ($parameterType) {
+            Model::class, $record::class => [$record],
+            default => parent::resolveDefaultClosureDependencyForEvaluationByType($parameterType),
+        };
     }
 }
