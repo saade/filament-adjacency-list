@@ -56,8 +56,7 @@ class EditAction extends Action implements HasRecord
         );
 
         $this->record(
-            fn (AdjacencyList $component, array $arguments) =>
-            $component->getCachedExistingRecords()->firstWhere($component->getCustomPath(), $component->getRelativeStatePath($arguments['statePath']))
+            fn (AdjacencyList $component, array $arguments) => $component->getCachedExistingRecords()->firstWhere($component->getCustomPath(), $component->getRelativeStatePath($arguments['statePath']))
         );
 
         $this->visible(
@@ -83,7 +82,7 @@ class EditAction extends Action implements HasRecord
     {
         $record = $this->getRecord();
 
-        if (!$record) {
+        if (! $record) {
             return parent::resolveDefaultClosureDependencyForEvaluationByType($parameterType);
         }
 
