@@ -15,15 +15,10 @@
         $isDisabled = $isDisabled();
         $isEditable = $isEditable();
         $isReorderable = $isReorderable();
-
+        
         $addAction = $getAction('add');
-
-        $itemActions = [
-            $getAction('addChild'),
-            $getAction('delete'),
-            $getAction('edit'),
-            $getAction('reorder')
-        ];
+        
+        $itemActions = [$getAction('addChild'), $getAction('delete'), $getAction('edit'), $getAction('reorder')];
     @endphp
 
     <div wire:key="tree-items-wrapper">
@@ -31,8 +26,8 @@
             class="space-y-2"
             data-sortable-container
             ax-load
-            ax-load-src="{{ \Filament\Support\Facades\FilamentAsset::getAlpineComponentSrc('filament-adjacency-list', 'saade/filament-adjacency-list') }}"
             ax-load-css="{{ \Filament\Support\Facades\FilamentAsset::getStyleHref('filament-adjacency-list-styles', 'saade/filament-adjacency-list') }}"
+            ax-load-src="{{ \Filament\Support\Facades\FilamentAsset::getAlpineComponentSrc('filament-adjacency-list', 'saade/filament-adjacency-list') }}"
             x-data="tree({
                 statePath: @js($getStatePath()),
                 disabled: @js($isDisabled)
@@ -64,8 +59,8 @@
     </div>
 
     <div class="flex justify-end">
-        @if($isAddable)
-            {{ ($addAction)(['statePath' => $getStatePath()]) }}
+        @if ($isAddable)
+            {{ $addAction(['statePath' => $getStatePath()]) }}
         @endif
     </div>
 </x-filament-forms::field-wrapper>
