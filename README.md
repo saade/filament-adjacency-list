@@ -30,11 +30,17 @@ AdjacencyList::make('subjects')
 ```
 
 ## Configuration
-### Customizing the `label` and `children` keys.
+### Customizing the `label` key used to display the item's label
 ```php
 AdjacencyList::make('subjects')
     ->labelKey('name')          // defaults to 'label'
-    ->childrenKey('subitems')   // defaults to 'children'
+```
+
+### Customizing the `children` key used to gather the item's children.
+> **Note:** This is only used when not using relationships.
+```php
+AdjacencyList::make('subjects')
+    ->childrenKey('children')   // defaults to 'children'
 ```
 
 ### Creating items without a modal.
@@ -62,6 +68,72 @@ AdjacencyList::make('subjects')
     ->editAction(fn (Action $action): Action => $action->icon('heroicon-o-pencil'))
     ->deleteAction(fn (Action $action): Action => $action->requiresConfirmation())
     ->reorderAction(fn (Action $action): Action => $action->icon('heroicon-o-arrow-path-rounded-square'))
+```
+
+### Relationships
+
+First, install the [Staudenmeir's Laravel Adjacency List](https://github.com/staudenmeir/laravel-adjacency-list) package.
+
+```bash
+composer require staudenmeir/laravel-adjacency-list:"^1.0"
+```
+
+Use the HasRecursiveRelationships trait in your model, and override the default path separator.
+
+```php
+class Department extends Model
+{
+    use \Staudenmeir\LaravelAdjacencyList\Eloquent\HasRecursiveRelationships;
+
+    public function getPathSeparator()
+    {
+        return '.children.';
+    }
+}
+```
+
+If you're already using the HasRecursiveRelationships trait for other parts of your application, it's probably not a good idea to change your model's path separator, since it can break other parts of your application. Instead, you can add as many path separators as you want:
+
+```php
+class Department extends Model
+{
+    use \Staudenmeir\LaravelAdjacencyList\Eloquent\HasRecursiveRelationships;
+
+    public function getCustomPaths()
+    {
+        return [
+            [
+                'name' => 'tree_path',
+                'column' => 'id',
+                'separator' => '.children.',
+            ],
+        ];
+    }
+}
+```
+
+Then, use the `relationship` method to define the relationship:
+
+```php
+AdjacencyList::make('subdepartments')
+    ->relationship('descendants')   // or 'descendantsAndSelf', 'children' ...
+    ->customPath('tree_path')       // if you're using custom paths
+```
+
+That's it! Now you're able to manage your adjacency lists using relationships.
+
+### Customizing the query
+```php
+AdjacencyList::make('subdepartments')
+    ->relationship('descendants', fn (Builder $query): Builder => $query->where('enabled', 1))
+```
+
+### Ordering
+If your application needs to order the items in the list, you can use the `orderColumn` method:
+
+```php
+AdjacencyList::make('subdepartments')
+    ->orderColumn('sort')   // or any other column
 ```
 
 ## Changelog

@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 
 class AdjacencyList extends Forms\Components\Field
 {
+    use Concerns\HasRelationships;
     use Concerns\HasActions;
     use Concerns\HasForm;
 
@@ -42,22 +43,22 @@ class AdjacencyList extends Forms\Components\Field
             'builder::sort' => [
                 function (AdjacencyList $component, string $targetStatePath, array $targetItemsStatePaths) {
                     $state = $component->getState();
-                    $targetStatePath = $this->getRelativeStatePath($targetStatePath);
+                    $relativeStatePath = $this->getRelativeStatePath($targetStatePath);
 
                     $items = [];
                     foreach ($targetItemsStatePaths as $targetItemStatePath) {
-                        $targetItemStatePath = $this->getRelativeStatePath($targetItemStatePath);
+                        $targetItemRelativeStatePath = $this->getRelativeStatePath($targetItemStatePath);
 
-                        $item = data_get($state, $targetItemStatePath);
-                        $uuid = Str::afterLast($targetItemStatePath, '.');
+                        $item = data_get($state, $targetItemRelativeStatePath);
+                        $uuid = Str::afterLast($targetItemRelativeStatePath, '.');
 
                         $items[$uuid] = $item;
                     }
 
-                    if (! $targetStatePath) {
+                    if (! $relativeStatePath) {
                         $state = $items;
                     } else {
-                        data_set($state, $targetStatePath, $items);
+                        data_set($state, $relativeStatePath, $items);
                     }
 
                     $component->state($state);
