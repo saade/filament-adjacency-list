@@ -40,16 +40,15 @@
                 @endif
 
                 <button
+                    type="button"
                     @class([
                         'w-full py-2 text-left rtl:text-right appearance-none',
                         'px-4' => !$hasChildren,
                         'cursor-default' => $disabled || !$editable,
                     ])
-                    type="button"
                     @if ($editable)
                     wire:click="mountFormComponentAction(@js($statePath), 'edit', @js(['statePath' => $itemStatePath]))"
-                    @endif
-                    >
+                    @endif>
                     <span>{{ $item[$labelKey] }}</span>
                 </button>
             </div>
