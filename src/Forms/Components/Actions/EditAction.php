@@ -1,11 +1,11 @@
 <?php
 
-namespace Saade\FilamentAdjacencyList\Foms\Components\Actions;
+namespace Saade\FilamentAdjacencyList\Forms\Components\Actions;
 
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Form;
 use Filament\Support\Enums\ActionSize;
-use Saade\FilamentAdjacencyList\Foms\Components\AdjacencyList;
+use Saade\FilamentAdjacencyList\Forms\Components\AdjacencyList;
 
 class EditAction extends Action
 {

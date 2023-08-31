@@ -20,7 +20,7 @@ composer require saade/filament-adjacency-list
 ## Usage
 
 ```php
-use Saade\FilamentAdjacencyList\AdjacencyList;
+use Saade\FilamentAdjacencyList\Forms\Components\AdjacencyList;
 
 AdjacencyList::make('subjects')
     ->form([
