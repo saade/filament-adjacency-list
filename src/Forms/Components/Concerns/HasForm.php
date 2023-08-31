@@ -1,6 +1,6 @@
 <?php
 
-namespace Saade\FilamentAdjacencyList\Foms\Components\Concerns;
+namespace Saade\FilamentAdjacencyList\Forms\Components\Concerns;
 
 use Closure;
 use Filament\Forms;
