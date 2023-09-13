@@ -70,7 +70,8 @@
             wire:key="{{ $itemStatePath }}-children"
             x-data="tree({
                 statePath: @js($itemStatePath . ".$childrenKey"),
-                disabled: @js($disabled)
+                disabled: @js($disabled),
+                maxDepth: @js($maxDepth)
             })"
         >
             @foreach ($item[$childrenKey] as $uuid => $child)
@@ -86,6 +87,7 @@
                     :label-key="$labelKey"
                     :reorderable="$reorderable"
                     :state-path="$statePath"
+                    :max-depth="$maxDepth"
                 />
             @endforeach
         </div>
