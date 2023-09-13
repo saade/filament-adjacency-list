@@ -15,6 +15,7 @@
         $isDisabled = $isDisabled();
         $isEditable = $isEditable();
         $isReorderable = $isReorderable();
+        $maxDepth = $getMaxDepth();
 
         $addAction = $getAction('add');
 
@@ -35,7 +36,8 @@
             ax-load-css="{{ \Filament\Support\Facades\FilamentAsset::getStyleHref('filament-adjacency-list-styles', 'saade/filament-adjacency-list') }}"
             x-data="tree({
                 statePath: @js($getStatePath()),
-                disabled: @js($isDisabled)
+                disabled: @js($isDisabled),
+                maxDepth: @js($maxDepth)
             })"
         >
             @forelse($getState() as $uuid => $item)
@@ -51,6 +53,7 @@
                     :label-key="$getLabelKey()"
                     :reorderable="$isReorderable"
                     :state-path="$getStatePath()"
+                    :max-depth="$maxDepth"
                 />
             @empty
                 <div @class([
