@@ -18,13 +18,12 @@ export default ({
             swapThreshold: 0.50,
             draggable: "[data-sortable-item]",
             handle: "[data-sortable-handle]",
-            onSort: (evt) => {
-
-                if (this.maxDepth !== null && this.getDepth(evt.item) > this.maxDepth) {
-                    // Undo the sorting
-                    evt.from.insertBefore(evt.item, evt.pullMode ? null : evt.from.children[evt.oldIndex]);
+            onMove: (evt) => {
+                if (this.maxDepth !== null && this.getDepth(evt.related) > this.maxDepth) {
+                    return false;  // Prevent sorting
                 }
-
+            },
+            onSort: (evt) => {
                 this.$wire.dispatchFormEvent('builder::sort', this.statePath, this.sortable.toArray())
             }
         })
@@ -37,6 +36,5 @@ export default ({
         }
         return depth;
     },
-
 
 })
