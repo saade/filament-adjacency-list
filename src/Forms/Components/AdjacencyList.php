@@ -18,6 +18,8 @@ class AdjacencyList extends Forms\Components\Field
 
     protected string | Closure $childrenKey = 'children';
 
+    protected ?int $maxDepth = null;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -88,6 +90,18 @@ class AdjacencyList extends Forms\Components\Field
     public function getChildrenKey(): string
     {
         return $this->evaluate($this->childrenKey);
+    }
+
+    public function maxDepth(int | Closure $maxDepth): static
+    {
+        $this->maxDepth = $maxDepth;
+
+        return $this;
+    }
+
+    public function getMaxDepth(): int
+    {
+        return $this->evaluate($this->maxDepth);
     }
 
     public function getRelativeStatePath(string $path): string
