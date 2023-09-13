@@ -18,7 +18,7 @@ class AdjacencyList extends Forms\Components\Field
 
     protected string | Closure $childrenKey = 'children';
 
-    protected ?int $maxDepth = null;
+    protected int $maxDepth = -1;
 
     protected function setUp(): void
     {
