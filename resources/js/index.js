@@ -19,7 +19,7 @@ export default ({
             draggable: "[data-sortable-item]",
             handle: "[data-sortable-handle]",
             onMove: (evt) => {
-                if (this.maxDepth !== null && this.getDepth(evt.related) > this.maxDepth) {
+                if (this.maxDepth >= 0 && this.getDepth(evt.related) > this.maxDepth) {
                     return false;  // Prevent sorting
                 }
             },
@@ -36,5 +36,4 @@ export default ({
         }
         return depth;
     },
-
 })
