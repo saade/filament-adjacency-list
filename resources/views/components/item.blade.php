@@ -43,14 +43,14 @@
 
                 <button
                     @class([
-                        'w-full py-2 text-left rtl:text-right appearance-none',
+                        'fi-adjacency-list-label w-full py-2 text-left rtl:text-right appearance-none',
                         'px-4' => !$hasChildren,
                         'cursor-default' => $disabled || !$editable,
                     ])
                     type="button"
                     @if($editable) wire:click="mountFormComponentAction(@js($statePath), 'edit', @js(['statePath' => $itemStatePath]))" @endif
                 >
-                    <span>{{ $item[$labelKey] }}</span>
+                    <span class="fi-adjacency-list-label-key">{{ $item[$labelKey] }}</span>
                 </button>
             </div>
 
