@@ -11,6 +11,8 @@
         [$addChildAction, $deleteAction, $editAction, $reorderAction] = $actions;
 
         $hasChildren = count($item[$childrenKey]) > 0;
+
+        $itemDepth = substr_count($itemStatePath, $childrenKey);
     @endphp
 
     <div class="relative group">
@@ -53,7 +55,7 @@
             </div>
 
             <div class="items-center flex-shrink-0 hidden px-2 space-x-2 rtl:space-x-reverse group-hover:flex">
-                @if($addable) {{ $addChildAction(['statePath' => $itemStatePath]) }} @endif
+                @if($addable && $maxDepth > $itemDepth) {{ $addChildAction(['statePath' => $itemStatePath]) }} @endif
                 @if($editable) {{ $editAction(['statePath' => $itemStatePath]) }} @endif
                 @if($deletable) {{ $deleteAction(['statePath' => $itemStatePath]) }} @endif
             </div>
