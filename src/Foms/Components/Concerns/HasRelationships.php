@@ -59,6 +59,7 @@ trait HasRelationships
                 $cb = function (array $items, array $item, string $key) use (&$cb, $component, $cachedExistingRecords, &$existingItemsIds) {
                     $relationship = $component->getRelationship();
 
+                    $path = $component->getPath();
                     $childrenKey = $component->getChildrenKey();
                     $recordKeyName = $relationship->getRelated()->getKeyName();
                     $recordKey = data_get($item, $recordKeyName);
@@ -68,7 +69,7 @@ trait HasRelationships
                         $item[$orderColumn] = array_search($key, array_keys($items));
                     }
 
-                    $data = Arr::except($item, [$recordKeyName, $childrenKey]);
+                    $data = Arr::except($item, [$recordKeyName, $childrenKey, $path]);
 
                     // Update or create record
                     if ($record = $cachedExistingRecords->firstWhere($recordKeyName, $recordKey)) {
@@ -78,6 +79,7 @@ trait HasRelationships
                         $record->fill($component->mutateRelationshipDataBeforeCreate($data));
                     }
 
+                    unset($record->{$path});
                     $record = $relationship->save($record);
 
                     // Update children
@@ -197,11 +199,32 @@ trait HasRelationships
             $relationshipQuery->orderBy($orderColumn);
         }
 
+        $path = $this->getPath();
+        $childrenKey = $this->getChildrenKey();
         $relatedKeyName = $relationship->getRelated()->getKeyName();
 
-        return $this->cachedExistingRecords = $relationshipQuery->get()->mapWithKeys(
-            fn (Model $item): array => ["record-{$item[$relatedKeyName]}" => $item],
-        );
+        return $this->cachedExistingRecords = $relationshipQuery->get()
+            ->map(
+                // Calculate tree path for each record and its children
+                $cb = function (Model $record, string $parentPath) use (&$cb, $path, $childrenKey, $relatedKeyName): Model {
+                    $record->{$path} = $parentPath ? "{$parentPath}.{$childrenKey}.{$record->{$relatedKeyName}}" : (string) $record->{$relatedKeyName};
+                    $record->setRelation($childrenKey, $record->{$childrenKey}->map(fn (Model $child) => $cb($child, $record->path)));
+
+                    return $record;
+                },
+            )
+            ->flatMap(
+                // Flatten records
+                $cb = function (Model $record) use (&$cb) {
+                    $children = $record->{$this->getChildrenKey()}->flatMap(fn (Model $child) => $cb($child));
+
+                    return [$record, ...$children];
+                }
+            )
+            ->mapWithKeys(
+                // Map records to a collection keyed by their id and prefixed with "record-"
+                fn (Model $item): array => ["record-{$item[$relatedKeyName]}" => $item],
+            );
     }
 
     public function clearCachedExistingRecords(): void
