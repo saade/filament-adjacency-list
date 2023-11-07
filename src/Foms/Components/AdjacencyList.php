@@ -9,9 +9,9 @@ use Illuminate\Support\Str;
 
 class AdjacencyList extends Forms\Components\Field
 {
-    use Concerns\HasRelationships;
     use Concerns\HasActions;
     use Concerns\HasForm;
+    use Concerns\HasRelationships;
 
     protected string $view = 'filament-adjacency-list::builder';
 
