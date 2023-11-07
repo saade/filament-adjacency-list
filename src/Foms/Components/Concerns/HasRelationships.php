@@ -207,6 +207,10 @@ trait HasRelationships
             ->map(
                 // Calculate tree path for each record and its children
                 $cb = function (Model $record, string $parentPath) use (&$cb, $path, $childrenKey, $relatedKeyName): Model {
+                    if ($record->{$path}) {
+                        return $record;
+                    }
+
                     $record->{$path} = $parentPath ? "{$parentPath}.{$childrenKey}.{$record->{$relatedKeyName}}" : (string) $record->{$relatedKeyName};
                     $record->setRelation($childrenKey, $record->{$childrenKey}->map(fn (Model $child) => $cb($child, $record->path)));
 
