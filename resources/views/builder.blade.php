@@ -10,6 +10,8 @@
     :state-path="$getStatePath()"
 >
     @php
+        $treeId = $getId();
+        
         $isAddable = $isAddable();
         $isDeletable = $isDeletable();
         $isDisabled = $isDisabled();
@@ -30,6 +32,7 @@
             ax-load-css="{{ \Filament\Support\Facades\FilamentAsset::getStyleHref('filament-adjacency-list-styles', 'saade/filament-adjacency-list') }}"
             ax-load-src="{{ \Filament\Support\Facades\FilamentAsset::getAlpineComponentSrc('filament-adjacency-list', 'saade/filament-adjacency-list') }}"
             x-data="tree({
+                treeId: @js($treeId),
                 statePath: @js($getStatePath()),
                 disabled: @js($isDisabled),
                 maxDepth: @js($maxDepth)
@@ -37,6 +40,7 @@
         >
             @forelse($getState() as $uuid => $item)
                 <x-filament-adjacency-list::item
+                    :tree-id="$treeId"
                     :actions="$itemActions"
                     :addable="$isAddable"
                     :children-key="$getChildrenKey()"

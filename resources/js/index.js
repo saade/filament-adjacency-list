@@ -1,6 +1,7 @@
 import Sortable from "sortablejs"
 
 export default ({
+    treeId,
     statePath,
     disabled,
     maxDepth
@@ -12,7 +13,7 @@ export default ({
     init() {
         this.sortable = new Sortable(this.$el, {
             disabled,
-            group: "nested",
+            group: treeId,
             animation: 150,
             fallbackOnBody: true,
             swapThreshold: 0.50,

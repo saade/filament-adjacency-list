@@ -1,4 +1,4 @@
-@props(['actions', 'addable', 'childrenKey', 'deletable', 'disabled', 'editable', 'item', 'itemStatePath', 'labelKey', 'reorderable', 'statePath'])
+@props(['treeId', 'actions', 'addable', 'childrenKey', 'deletable', 'disabled', 'editable', 'item', 'itemStatePath', 'labelKey', 'reorderable', 'statePath'])
 
 <div
     class="space-y-2"
@@ -76,6 +76,7 @@
             class="space-y-2"
             wire:key="{{ $itemStatePath }}-children"
             x-data="tree({
+                treeId: @js($treeId),
                 statePath: @js($itemStatePath . ".$childrenKey"),
                 disabled: @js($disabled),
                 maxDepth: @js($maxDepth)
@@ -83,6 +84,7 @@
         >
             @foreach ($item[$childrenKey] ?? [] as $uuid => $child)
                 <x-filament-adjacency-list::item
+                    :tree-id="$treeId"
                     :actions="$actions"
                     :addable="$addable"
                     :children-key="$childrenKey"
