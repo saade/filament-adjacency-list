@@ -41,13 +41,17 @@ class AdjacencyList extends Forms\Components\Field
 
         $this->registerListeners([
             'builder::sort' => [
-                function (AdjacencyList $component, string $targetStatePath, array $targetItemsStatePaths) {
+                static function (AdjacencyList $component, string $targetStatePath, array $targetItemsStatePaths) {
+                    if (! str_starts_with($targetStatePath, $component->getStatePath())) {
+                        return;
+                    }
+
                     $state = $component->getState();
-                    $relativeStatePath = $this->getRelativeStatePath($targetStatePath);
+                    $relativeStatePath = $component->getRelativeStatePath($targetStatePath);
 
                     $items = [];
                     foreach ($targetItemsStatePaths as $targetItemStatePath) {
-                        $targetItemRelativeStatePath = $this->getRelativeStatePath($targetItemStatePath);
+                        $targetItemRelativeStatePath = $component->getRelativeStatePath($targetItemStatePath);
 
                         $item = data_get($state, $targetItemRelativeStatePath);
                         $uuid = Str::afterLast($targetItemRelativeStatePath, '.');
