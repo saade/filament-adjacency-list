@@ -142,14 +142,14 @@ trait HasRelationships
                 function (Model $record) use (&$state, $path, $translatableContentDriver): void {
                     $data = $translatableContentDriver ?
                         $translatableContentDriver->getRecordAttributesToArray($record) :
-                        $record->only([$record->getKeyName(), ...$record->getFillable()]);
-
-                    $key = $record->{$path};
+                        $record->attributesToArray();
 
                     $data = $this->mutateRelationshipDataBeforeFill($data);
 
                     // Depending on the records order, a children can be created before its parent.
                     // In this case, we need to merge the children with the parent data.
+                    $key = $record->{$path};
+
                     if ($existing = data_get($state, $key)) {
                         data_set($state, $key, array_merge($existing, $data));
                     } else {
