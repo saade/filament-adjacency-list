@@ -1,4 +1,4 @@
-@props(['actions', 'addable', 'childrenKey', 'deletable', 'disabled', 'editable', 'item', 'itemStatePath', 'labelKey', 'reorderable', 'statePath'])
+@props(['actions', 'addable', 'childrenKey', 'deletable', 'disabled', 'editable', 'item', 'itemStatePath', 'labelKey', 'reorderable', 'statePath', 'maxDepth'])
 
 <div
     class="space-y-2"
@@ -11,6 +11,8 @@
         [$addChildAction, $deleteAction, $editAction, $reorderAction] = $actions;
 
         $hasChildren = count($item[$childrenKey]) > 0;
+
+        $itemDepth = substr_count($itemStatePath, $childrenKey);
     @endphp
 
     <div class="relative group">
@@ -41,19 +43,19 @@
 
                 <button
                     @class([
-                        'w-full py-2 text-left rtl:text-right appearance-none',
+                        'fi-adjacency-list-label w-full py-2 text-left rtl:text-right appearance-none',
                         'px-4' => !$hasChildren,
                         'cursor-default' => $disabled || !$editable,
                     ])
                     type="button"
                     @if($editable) wire:click="mountFormComponentAction(@js($statePath), 'edit', @js(['statePath' => $itemStatePath]))" @endif
                 >
-                    <span>{{ $item[$labelKey] }}</span>
+                    <span class="fi-adjacency-list-label-key">{{ $item[$labelKey] }}</span>
                 </button>
             </div>
 
             <div class="items-center flex-shrink-0 hidden px-2 space-x-2 rtl:space-x-reverse group-hover:flex">
-                @if($addable) {{ $addChildAction(['statePath' => $itemStatePath]) }} @endif
+                @if($addable && ($maxDepth == -1 || $maxDepth > $itemDepth)) {{ $addChildAction(['statePath' => $itemStatePath]) }} @endif
                 @if($editable) {{ $editAction(['statePath' => $itemStatePath]) }} @endif
                 @if($deletable) {{ $deleteAction(['statePath' => $itemStatePath]) }} @endif
             </div>
