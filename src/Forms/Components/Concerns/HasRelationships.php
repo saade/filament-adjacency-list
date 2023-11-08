@@ -1,13 +1,13 @@
 <?php
 
-namespace Saade\FilamentAdjacencyList\Foms\Components\Concerns;
+namespace Saade\FilamentAdjacencyList\Forms\Components\Concerns;
 
 use Closure;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use Saade\FilamentAdjacencyList\Foms\Components\AdjacencyList;
+use Saade\FilamentAdjacencyList\Forms\Components\AdjacencyList;
 
 trait HasRelationships
 {

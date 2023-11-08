@@ -1,14 +1,14 @@
 <?php
 
-namespace Saade\FilamentAdjacencyList\Foms\Components\Concerns;
+namespace Saade\FilamentAdjacencyList\Forms\Components\Concerns;
 
 use Closure;
 use Filament\Forms\Components\Actions\Action;
-use Saade\FilamentAdjacencyList\Foms\Components\Actions\AddAction;
-use Saade\FilamentAdjacencyList\Foms\Components\Actions\AddChildAction;
-use Saade\FilamentAdjacencyList\Foms\Components\Actions\DeleteAction;
-use Saade\FilamentAdjacencyList\Foms\Components\Actions\EditAction;
-use Saade\FilamentAdjacencyList\Foms\Components\Actions\ReorderAction;
+use Saade\FilamentAdjacencyList\Forms\Components\Actions\AddAction;
+use Saade\FilamentAdjacencyList\Forms\Components\Actions\AddChildAction;
+use Saade\FilamentAdjacencyList\Forms\Components\Actions\DeleteAction;
+use Saade\FilamentAdjacencyList\Forms\Components\Actions\EditAction;
+use Saade\FilamentAdjacencyList\Forms\Components\Actions\ReorderAction;
 
 trait HasActions
 {

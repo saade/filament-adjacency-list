@@ -6,7 +6,7 @@
 A Filament package to manage adjacency lists (aka trees).
 
 <p align="center">
-    <img src="art/cover.png" alt="Banner" style="width: 100%; max-width: 800px;" />
+    <img src="https://raw.githubusercontent.com/saade/filament-adjacency-list/3.x/art/cover.png" alt="Banner" style="width: 100%; max-width: 800px;" />
 </p>
 
 ## Installation
@@ -20,7 +20,7 @@ composer require saade/filament-adjacency-list
 ## Usage
 
 ```php
-use Saade\FilamentAdjacencyList\AdjacencyList;
+use Saade\FilamentAdjacencyList\Forms\Components\AdjacencyList;
 
 AdjacencyList::make('subjects')
     ->form([
@@ -41,6 +41,12 @@ AdjacencyList::make('subjects')
 ```php
 AdjacencyList::make('subjects')
     ->childrenKey('children')   // defaults to 'children'
+```
+
+### Customizing the `MaxDepth` of the tree.
+```php
+AdjacencyList::make('subjects')
+    ->maxDepth(2)               // defaults to -1 (unlimited depth)
 ```
 
 ### Creating items without a modal.
@@ -158,9 +164,8 @@ Please review [our security policy](../../security/policy) on how to report secu
 
 The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
 
-<br><br>
 <p align="center">
     <a href="https://github.com/sponsors/saade">
-        <img src="art/sponsor.png" alt="Sponsor Saade" style="width: 100%; max-width: 800px;" />
+        <img src="https://raw.githubusercontent.com/saade/filament-adjacency-list/3.x/art/sponsor.png" alt="Sponsor Saade" style="width: 100%; max-width: 800px;" />
     </a>
 </p>
