@@ -75,6 +75,8 @@ AdjacencyList::make('subjects')
 > If you want to add `->extraAttributes()` to the action, you need to add the `['data-sortable-handle' => 'true']` attribute to the array.
 > 
 > if you want to trigger a livewire action on click, you need to chain `->livewireClickHandlerEnabled()` on the action.
+>
+> The array passed in as data should have unique keys.
 
 ## Changelog
 
