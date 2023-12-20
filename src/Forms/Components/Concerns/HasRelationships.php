@@ -4,6 +4,7 @@ namespace Saade\FilamentAdjacencyList\Forms\Components\Concerns;
 
 use Closure;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
@@ -27,6 +28,8 @@ trait HasRelationships
 
     protected string | Closure | null $customPath = null;
 
+    protected array | Closure | null $pivotAttributes = null;
+
     public function orderColumn(string | Closure | null $column = 'sort'): static
     {
         $this->orderColumn = $column;
@@ -34,7 +37,14 @@ trait HasRelationships
         return $this;
     }
 
-    public function relationship(string | Closure $name = null, Closure $modifyQueryUsing = null): static
+    public function pivotAttributes(array | Closure | null $pivotAttributes): static
+    {
+        $this->pivotAttributes = $pivotAttributes;
+
+        return $this;
+    }
+
+    public function relationship(string | Closure | null $name = null, ?Closure $modifyQueryUsing = null): static
     {
         $this->relationship = $name ?? $this->getName();
         $this->modifyRelationshipQueryUsing = $modifyQueryUsing;
@@ -80,14 +90,32 @@ trait HasRelationships
                     }
 
                     unset($record->{$path});
-                    $record = $relationship->save($record);
 
-                    // Update children
-                    if ($children = data_get($item, $childrenKey)) {
-                        $childrenRecords = collect($children)
-                            ->map(fn ($child, $childKey) => $cb($children, $child, $childKey));
+                    if ($relationship instanceof BelongsToMany) {
+                        // if it's a many-to-many with pivot, we need to recursively walk down to the leaf nodes,
+                        // potentially creating new nodes along the way, before we can then sync the children to the
+                        // pivot on the way back up the tree.
+                        $record->save();
 
-                        $record->{$childrenKey}()->saveMany($childrenRecords);
+                        if ($children = data_get($item, $childrenKey)) {
+                            $childrenRecords = collect($children)
+                                ->map(fn ($child, $childKey) => $cb($children, $child, $childKey));
+
+                            $record->{$childrenKey}()->syncWithPivotValues(
+                                $childrenRecords->pluck($recordKeyName),
+                                $component->getPivotAttributes() ?? []
+                            );
+                        }
+                    } else {
+                        $record = $relationship->save($record);
+
+                        // Update children
+                        if ($children = data_get($item, $childrenKey)) {
+                            $childrenRecords = collect($children)
+                                ->map(fn ($child, $childKey) => $cb($children, $child, $childKey));
+
+                            $record->{$childrenKey}()->saveMany($childrenRecords);
+                        }
                     }
 
                     // Update cached existing records
@@ -166,7 +194,7 @@ trait HasRelationships
         return $this->evaluate($this->orderColumn);
     }
 
-    public function getRelationship(): ?HasMany
+    public function getRelationship(): HasMany | BelongsToMany | null
     {
         if (! $this->hasRelationship()) {
             return null;
@@ -178,6 +206,11 @@ trait HasRelationships
     public function getRelationshipName(): ?string
     {
         return $this->evaluate($this->relationship);
+    }
+
+    public function getPivotAttributes(): ?array
+    {
+        return $this->evaluate($this->pivotAttributes);
     }
 
     public function getCachedExistingRecords(): Collection
