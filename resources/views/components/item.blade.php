@@ -1,15 +1,29 @@
-@props(['treeId', 'actions', 'addable', 'childrenKey', 'deletable', 'disabled', 'editable', 'item', 'itemStatePath', 'labelKey', 'reorderable', 'statePath'])
+@props([
+    'treeId',
+    'actions',
+    'addable',
+    'childrenKey',
+    'deletable',
+    'disabled',
+    'editable',
+    'startCollapsed',
+    'item',
+    'itemStatePath',
+    'labelKey',
+    'reorderable',
+    'statePath',
+])
 
 <div
     class="space-y-2"
     data-id="{{ $itemStatePath }}"
     data-sortable-item
-    x-data="{ open: $persist(true) }"
+    x-data="{ open: $persist(! @js($startCollapsed)) }"
     wire:key="{{ $itemStatePath }}"
 >
     @php
         [$addChildAction, $deleteAction, $editAction, $reorderAction] = $actions;
-        
+
         $hasChildren = count($item[$childrenKey] ?? []) > 0;
     @endphp
 
@@ -47,7 +61,7 @@
                         'cursor-default' => $disabled || !$editable,
                     ])
                     @if ($editable)
-                    wire:click="mountFormComponentAction(@js($statePath), 'edit', @js(['statePath' => $itemStatePath]))"
+                        wire:click="mountFormComponentAction(@js($statePath), 'edit', @js(['statePath' => $itemStatePath]))"
                     @endif>
                     <span>{{ $item[$labelKey] }}</span>
                 </button>
@@ -91,6 +105,7 @@
                     :deletable="$deletable"
                     :disabled="$disabled"
                     :editable="$editable"
+                    :start-collapsed="$startCollapsed"
                     :item="$child"
                     :item-state-path="$itemStatePath . '.' . $childrenKey . '.' . $uuid"
                     :label-key="$labelKey"

@@ -21,6 +21,8 @@ class AdjacencyList extends Forms\Components\Field
 
     protected int $maxDepth = -1;
 
+    protected bool $startCollapsed = false;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -107,6 +109,18 @@ class AdjacencyList extends Forms\Components\Field
     public function getMaxDepth(): int
     {
         return $this->evaluate($this->maxDepth);
+    }
+
+    public function startCollapsed(bool | Closure $startCollapsed): static
+    {
+        $this->startCollapsed = $startCollapsed;
+
+        return $this;
+    }
+
+    public function getStartCollapsed(): bool
+    {
+        return $this->evaluate($this->startCollapsed);
     }
 
     public function getRelativeStatePath(string $path): string
