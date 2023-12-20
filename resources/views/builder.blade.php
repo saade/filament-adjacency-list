@@ -11,16 +11,15 @@
 >
     @php
         $treeId = $getId();
-        
+
         $isAddable = $isAddable();
         $isDeletable = $isDeletable();
         $isDisabled = $isDisabled();
         $isEditable = $isEditable();
         $isReorderable = $isReorderable();
         $maxDepth = $getMaxDepth();
-        
+        $startCollapsed = $getStartCollapsed();
         $addAction = $getAction('add');
-        
         $itemActions = [$getAction('addChild'), $getAction('delete'), $getAction('edit'), $getAction('reorder')];
     @endphp
 
@@ -47,6 +46,7 @@
                     :deletable="$isDeletable"
                     :disabled="$isDisabled"
                     :editable="$isEditable"
+                    :start-collapsed="$startCollapsed"
                     :item="$item"
                     :item-state-path="$getStatePath() . '.' . $uuid"
                     :label-key="$getLabelKey()"
