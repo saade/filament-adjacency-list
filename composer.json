@@ -40,13 +40,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Saade\\FilamentAdjacencyList\\": "src/",
-            "Saade\\FilamentAdjacencyList\\Database\\Factories\\": "database/factories/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Saade\\FilamentAdjacencyList\\Tests\\": "tests/"
+            "Saade\\FilamentAdjacencyList\\": "src/"
         }
     },
     "scripts": {
@@ -67,10 +61,7 @@
         "laravel": {
             "providers": [
                 "Saade\\FilamentAdjacencyList\\FilamentAdjacencyListServiceProvider"
-            ],
-            "aliases": {
-                "FilamentAdjacencyList": "Saade\\FilamentAdjacencyList\\Facades\\FilamentAdjacencyList"
-            }
+            ]
         }
     },
     "minimum-stability": "dev",

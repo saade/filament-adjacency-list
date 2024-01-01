@@ -11,6 +11,7 @@ class AdjacencyList extends Forms\Components\Field
 {
     use Concerns\HasActions;
     use Concerns\HasForm;
+    use Concerns\HasRelationships;
 
     protected string $view = 'filament-adjacency-list::builder';
 
@@ -42,24 +43,28 @@ class AdjacencyList extends Forms\Components\Field
 
         $this->registerListeners([
             'builder::sort' => [
-                function (AdjacencyList $component, string $targetStatePath, array $targetItemsStatePaths) {
+                static function (AdjacencyList $component, string $targetStatePath, array $targetItemsStatePaths) {
+                    if (! str_starts_with($targetStatePath, $component->getStatePath())) {
+                        return;
+                    }
+
                     $state = $component->getState();
-                    $targetStatePath = $this->getRelativeStatePath($targetStatePath);
+                    $relativeStatePath = $component->getRelativeStatePath($targetStatePath);
 
                     $items = [];
                     foreach ($targetItemsStatePaths as $targetItemStatePath) {
-                        $targetItemStatePath = $this->getRelativeStatePath($targetItemStatePath);
+                        $targetItemRelativeStatePath = $component->getRelativeStatePath($targetItemStatePath);
 
-                        $item = data_get($state, $targetItemStatePath);
-                        $uuid = Str::afterLast($targetItemStatePath, '.');
+                        $item = data_get($state, $targetItemRelativeStatePath);
+                        $uuid = Str::afterLast($targetItemRelativeStatePath, '.');
 
                         $items[$uuid] = $item;
                     }
 
-                    if (! $targetStatePath) {
+                    if (! $relativeStatePath) {
                         $state = $items;
                     } else {
-                        data_set($state, $targetStatePath, $items);
+                        data_set($state, $relativeStatePath, $items);
                     }
 
                     $component->state($state);

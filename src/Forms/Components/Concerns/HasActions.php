@@ -120,6 +120,11 @@ trait HasActions
             ]) ?? $action;
         }
 
+        $action->extraAttributes([
+            'data-sortable-handle' => 'true',
+            ...$action->getExtraAttributes(),
+        ]);
+
         return $action;
     }
 

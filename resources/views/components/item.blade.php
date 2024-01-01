@@ -1,4 +1,4 @@
-@props(['actions', 'addable', 'childrenKey', 'deletable', 'disabled', 'editable', 'item', 'itemStatePath', 'labelKey', 'reorderable', 'statePath'])
+@props(['treeId', 'actions', 'addable', 'childrenKey', 'deletable', 'disabled', 'editable', 'item', 'itemStatePath', 'labelKey', 'reorderable', 'statePath'])
 
 <div
     class="space-y-2"
@@ -9,8 +9,8 @@
 >
     @php
         [$addChildAction, $deleteAction, $editAction, $reorderAction] = $actions;
-
-        $hasChildren = count($item[$childrenKey]) > 0;
+        
+        $hasChildren = count($item[$childrenKey] ?? []) > 0;
     @endphp
 
     <div class="relative group">
@@ -19,12 +19,12 @@
             'dark:bg-gray-900 dark:border-white/10',
         ])>
             <div class="flex w-full">
-                @if($reorderable)
+                @if ($reorderable)
                     <div @class([
                         'flex items-center bg-gray-50 rounded-l-lg rtl:rounded-r-lg border-r rtl:border-r-0 rtl:border-l border-gray-300 px-1',
                         'dark:bg-gray-800 dark:border-white/10',
                     ])>
-                        {{ ($reorderAction)(['statePath' => $itemStatePath]) }}
+                        {{ $reorderAction(['statePath' => $itemStatePath]) }}
                     </div>
                 @endif
 
@@ -40,22 +40,29 @@
                 @endif
 
                 <button
+                    type="button"
                     @class([
                         'w-full py-2 text-left rtl:text-right appearance-none',
                         'px-4' => !$hasChildren,
                         'cursor-default' => $disabled || !$editable,
                     ])
-                    type="button"
-                    @if($editable) wire:click="mountFormComponentAction(@js($statePath), 'edit', @js(['statePath' => $itemStatePath]))" @endif
-                >
+                    @if ($editable)
+                    wire:click="mountFormComponentAction(@js($statePath), 'edit', @js(['statePath' => $itemStatePath]))"
+                    @endif>
                     <span>{{ $item[$labelKey] }}</span>
                 </button>
             </div>
 
             <div class="items-center flex-shrink-0 hidden px-2 space-x-2 rtl:space-x-reverse group-hover:flex">
-                @if($addable) {{ $addChildAction(['statePath' => $itemStatePath]) }} @endif
-                @if($editable) {{ $editAction(['statePath' => $itemStatePath]) }} @endif
-                @if($deletable) {{ $deleteAction(['statePath' => $itemStatePath]) }} @endif
+                @if ($addable)
+                    {{ $addChildAction(['statePath' => $itemStatePath]) }}
+                @endif
+                @if ($editable)
+                    {{ $editAction(['statePath' => $itemStatePath]) }}
+                @endif
+                @if ($deletable)
+                    {{ $deleteAction(['statePath' => $itemStatePath]) }}
+                @endif
             </div>
         </div>
     </div>
@@ -69,13 +76,15 @@
             class="space-y-2"
             wire:key="{{ $itemStatePath }}-children"
             x-data="tree({
+                treeId: @js($treeId),
                 statePath: @js($itemStatePath . ".$childrenKey"),
                 disabled: @js($disabled),
                 maxDepth: @js($maxDepth)
             })"
         >
-            @foreach ($item[$childrenKey] as $uuid => $child)
+            @foreach ($item[$childrenKey] ?? [] as $uuid => $child)
                 <x-filament-adjacency-list::item
+                    :tree-id="$treeId"
                     :actions="$actions"
                     :addable="$addable"
                     :children-key="$childrenKey"
