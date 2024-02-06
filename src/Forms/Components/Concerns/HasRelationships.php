@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Saade\FilamentAdjacencyList\Forms\Components\AdjacencyList;
+use Staudenmeir\LaravelAdjacencyList\Eloquent\HasRecursiveRelationships;
 
 trait HasRelationships
 {
@@ -44,7 +45,7 @@ trait HasRelationships
         return $this;
     }
 
-    public function relationship(string | Closure | null $name = null, ?Closure $modifyQueryUsing = null): static
+    public function relationship(string | Closure $name = null, Closure $modifyQueryUsing = null): static
     {
         $this->relationship = $name ?? $this->getName();
         $this->modifyRelationshipQueryUsing = $modifyQueryUsing;
@@ -160,33 +161,25 @@ trait HasRelationships
             return [];
         }
 
-        $state = [];
+        return $records
+            ->toTree()
+            ->mapWithKeys(
+                $cb = function (Model $record) use (&$cb): array {
+                    $childrenKey = $this->getChildrenKey();
+                    $recordKeyName = $record->getKeyName();
 
-        $path = $this->getPath();
-        $translatableContentDriver = $this->getLivewire()->makeFilamentTranslatableContentDriver();
+                    $data = $this->mutateRelationshipDataBeforeFill(
+                        $this->getLivewire()->makeFilamentTranslatableContentDriver() ?
+                            $this->getLivewire()->makeFilamentTranslatableContentDriver()->getRecordAttributesToArray($record) :
+                            $record->attributesToArray()
+                    );
 
-        $records
-            ->each(
-                function (Model $record) use (&$state, $path, $translatableContentDriver): void {
-                    $data = $translatableContentDriver ?
-                        $translatableContentDriver->getRecordAttributesToArray($record) :
-                        $record->attributesToArray();
+                    $data[$childrenKey] = $record->children->mapWithKeys($cb)->toArray();
 
-                    $data = $this->mutateRelationshipDataBeforeFill($data);
-
-                    // Depending on the records order, a children can be created before its parent.
-                    // In this case, we need to merge the children with the parent data.
-                    $key = $record->{$path};
-
-                    if ($existing = data_get($state, $key)) {
-                        data_set($state, $key, array_merge($existing, $data));
-                    } else {
-                        data_set($state, $key, $data);
-                    }
+                    return ['record-' . $record->{$recordKeyName} => $data];
                 }
-            );
-
-        return $state;
+            )
+            ->toArray();
     }
 
     public function getOrderColumn(): ?string
@@ -200,7 +193,13 @@ trait HasRelationships
             return null;
         }
 
-        return $this->getModelInstance()->{$this->getRelationshipName()}();
+        if ($model = $this->getModelInstance()) {
+            if (! in_array(HasRecursiveRelationships::class, class_uses($model))) {
+                throw new \Exception('The model ' . $model::class . ' must use the HasRecursiveRelationships trait.');
+            }
+        }
+
+        return $model->{$this->getRelationshipName()}();
     }
 
     public function getRelationshipName(): ?string
@@ -232,36 +231,7 @@ trait HasRelationships
             $relationshipQuery->orderBy($orderColumn);
         }
 
-        $path = $this->getPath();
-        $childrenKey = $this->getChildrenKey();
-        $relatedKeyName = $relationship->getRelated()->getKeyName();
-
-        return $this->cachedExistingRecords = $relationshipQuery->get()
-            ->map(
-                // Calculate tree path for each record and its children
-                $cb = function (Model $record, string $parentPath) use (&$cb, $path, $childrenKey, $relatedKeyName): Model {
-                    if ($record->{$path}) {
-                        return $record;
-                    }
-
-                    $record->{$path} = $parentPath ? "{$parentPath}.{$childrenKey}.{$record->{$relatedKeyName}}" : (string) $record->{$relatedKeyName};
-                    $record->setRelation($childrenKey, $record->{$childrenKey}->map(fn (Model $child) => $cb($child, $record->path)));
-
-                    return $record;
-                },
-            )
-            ->flatMap(
-                // Flatten records
-                $cb = function (Model $record) use (&$cb) {
-                    $children = $record->{$this->getChildrenKey()}->flatMap(fn (Model $child) => $cb($child));
-
-                    return [$record, ...$children];
-                }
-            )
-            ->mapWithKeys(
-                // Map records to a collection keyed by their id and prefixed with "record-"
-                fn (Model $item): array => ["record-{$item[$relatedKeyName]}" => $item],
-            );
+        return $this->cachedExistingRecords = $relationshipQuery->get();
     }
 
     public function clearCachedExistingRecords(): void
