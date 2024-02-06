@@ -48,6 +48,7 @@ class AdjacencyList extends Component
                         $item[$orderColumn] = array_search($key, array_keys($items));
                     }
 
+                    // TODO: add ignore columns method
                     $data = Arr::except($item, [$recordKeyName, $childrenKey, 'path', 'depth']);
 
                     // Update or create record

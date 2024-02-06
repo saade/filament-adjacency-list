@@ -2,6 +2,7 @@
 
 namespace Saade\FilamentAdjacencyList\Forms\Components;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Arr;
@@ -29,10 +30,11 @@ class NestedSet extends Component
             }
 
             $cachedExistingRecords = $component->getCachedExistingRecords();
+            $existingItemsIds = [];
 
             $data = collect($state)
                 ->map(
-                    $cb = function ($item, $key, $children = []) use (&$cb, $component, $state, $cachedExistingRecords) {
+                    $cb = function (array $item, string $key, array $children = []) use (&$cb, $component, $state, $cachedExistingRecords, &$existingItemsIds): array {
                         $relationship = $component->getRelationship();
 
                         $childrenKey = $component->getChildrenKey();
@@ -44,6 +46,7 @@ class NestedSet extends Component
                             $item[$orderColumn] = array_search($key, array_keys($children ?: $state));
                         }
 
+                        // TODO: add ignore columns method
                         $data = Arr::except($item, [$childrenKey, 'parent_id', '_lft', '_rgt', 'created_at', 'updated_at', 'deleted_at']);
 
                         // Update or create record
@@ -60,12 +63,23 @@ class NestedSet extends Component
                                 ->toArray();
                         }
 
+                        // Update cached existing records
+                        $existingItemsIds[] = $data[$recordKeyName];
+
                         return $data;
                     }
                 )
                 ->toArray();
 
             $component->getRelatedModel()::rebuildTree($data);
+
+            // Delete removed records
+            $cachedExistingRecords
+                ->filter(fn (Model $record) => ! in_array($record->getKey(), $existingItemsIds))
+                ->each(function (Model $record) use ($cachedExistingRecords) {
+                    $record->delete();
+                    $cachedExistingRecords->forget("record-{$record->getKey()}");
+                });
 
             $component->fillFromRelationship(cached: false);
         });
