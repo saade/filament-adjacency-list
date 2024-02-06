@@ -6,7 +6,7 @@ use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Form;
 use Filament\Support\Enums\ActionSize;
 use Illuminate\Support\Str;
-use Saade\FilamentAdjacencyList\Forms\Components\AdjacencyList;
+use Saade\FilamentAdjacencyList\Forms\Components\Component;
 
 class AddChildAction extends Action
 {
@@ -28,7 +28,7 @@ class AddChildAction extends Action
         $this->modalSubmitActionLabel(fn (): string => __('filament-adjacency-list::adjacency-list.actions.add-child.modal.actions.create'));
 
         $this->action(
-            function (AdjacencyList $component, array $arguments, array $data): void {
+            function (Component $component, array $arguments, array $data): void {
                 $statePath = $component->getRelativeStatePath($arguments['statePath']);
                 $uuid = (string) Str::uuid();
 
@@ -47,11 +47,11 @@ class AddChildAction extends Action
         $this->size(ActionSize::ExtraSmall);
 
         $this->form(
-            fn (AdjacencyList $component, Form $form) => $component->getForm($form)
+            fn (Component $component, Form $form) => $component->getForm($form)
         );
 
         $this->visible(
-            fn (AdjacencyList $component): bool => $component->isAddable()
+            fn (Component $component): bool => $component->isAddable()
         );
     }
 }

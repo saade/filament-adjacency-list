@@ -4,7 +4,7 @@ namespace Saade\FilamentAdjacencyList\Forms\Components\Actions;
 
 use Filament\Forms\Components\Actions\Action;
 use Filament\Support\Enums\ActionSize;
-use Saade\FilamentAdjacencyList\Forms\Components\AdjacencyList;
+use Saade\FilamentAdjacencyList\Forms\Components\Component;
 
 class ReorderAction extends Action
 {
@@ -26,7 +26,7 @@ class ReorderAction extends Action
         $this->size(ActionSize::Small);
 
         $this->visible(
-            fn (AdjacencyList $component): bool => $component->isReorderable()
+            fn (Component $component): bool => $component->isReorderable()
         );
     }
 }

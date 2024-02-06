@@ -4,7 +4,7 @@ namespace Saade\FilamentAdjacencyList\Forms\Components\Actions;
 
 use Filament\Forms\Components\Actions\Action;
 use Filament\Support\Enums\ActionSize;
-use Saade\FilamentAdjacencyList\Forms\Components\AdjacencyList;
+use Saade\FilamentAdjacencyList\Forms\Components\Component;
 
 class DeleteAction extends Action
 {
@@ -28,7 +28,7 @@ class DeleteAction extends Action
         $this->modalSubmitActionLabel(fn (): string => __('filament-adjacency-list::adjacency-list.actions.delete.modal.actions.confirm'));
 
         $this->action(
-            function (array $arguments, AdjacencyList $component): void {
+            function (array $arguments, Component $component): void {
                 $statePath = $component->getRelativeStatePath($arguments['statePath']);
                 $items = $component->getState();
 
@@ -41,7 +41,7 @@ class DeleteAction extends Action
         $this->size(ActionSize::ExtraSmall);
 
         $this->visible(
-            fn (AdjacencyList $component): bool => $component->isDeletable()
+            fn (Component $component): bool => $component->isDeletable()
         );
     }
 }

@@ -3,128 +3,132 @@
 namespace Saade\FilamentAdjacencyList\Forms\Components;
 
 use Closure;
-use Filament\Forms;
-use Filament\Forms\Components\Actions\Action;
-use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Arr;
+use Staudenmeir\LaravelAdjacencyList\Eloquent\HasRecursiveRelationships;
 
-class AdjacencyList extends Forms\Components\Field
+class AdjacencyList extends Component
 {
-    use Concerns\HasActions;
-    use Concerns\HasForm;
-    use Concerns\HasRelationships;
+    use Concerns\HasRelationship;
 
-    protected string $view = 'filament-adjacency-list::builder';
-
-    protected string | Closure $labelKey = 'label';
-
-    protected string | Closure $childrenKey = 'children';
-
-    protected int $maxDepth = -1;
-
-    protected bool $startCollapsed = false;
+    protected array | Closure | null $pivotAttributes = null;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->afterStateHydrated(function (AdjacencyList $component, ?array $state) {
-            if (! $state) {
-                $component->state([]);
-            }
+        $this->afterStateHydrated(null);
+
+        $this->loadStateFromRelationshipsUsing(static function (AdjacencyList $component) {
+            $component->clearCachedExistingRecords();
+
+            $component->fillFromRelationship();
         });
 
-        $this->default([]);
+        $this->saveRelationshipsUsing(static function (AdjacencyList $component, ?array $state) {
+            if (! is_array($state)) {
+                $state = [];
+            }
 
-        $this->registerActions([
-            fn (AdjacencyList $component): Action => $component->getAddAction(),
-            fn (AdjacencyList $component): Action => $component->getAddChildAction(),
-            fn (AdjacencyList $component): Action => $component->getDeleteAction(),
-            fn (AdjacencyList $component): Action => $component->getEditAction(),
-            fn (AdjacencyList $component): Action => $component->getReorderAction(),
-        ]);
+            $cachedExistingRecords = $component->getCachedExistingRecords();
+            $existingItemsIds = [];
 
-        $this->registerListeners([
-            'builder::sort' => [
-                static function (AdjacencyList $component, string $targetStatePath, array $targetItemsStatePaths) {
-                    if (! str_starts_with($targetStatePath, $component->getStatePath())) {
-                        return;
+            foreach ($state as $key => $item) {
+                $cb = function (array $items, array $item, string $key) use (&$cb, $component, $cachedExistingRecords, &$existingItemsIds) {
+                    $relationship = $component->getRelationship();
+
+                    $childrenKey = $component->getChildrenKey();
+                    $recordKeyName = $relationship->getRelated()->getKeyName();
+                    $recordKey = data_get($item, $recordKeyName);
+
+                    // Update item order
+                    if ($orderColumn = $component->getOrderColumn()) {
+                        $item[$orderColumn] = array_search($key, array_keys($items));
                     }
 
-                    $state = $component->getState();
-                    $relativeStatePath = $component->getRelativeStatePath($targetStatePath);
+                    $data = Arr::except($item, [$recordKeyName, $childrenKey, 'path', 'depth']);
 
-                    $items = [];
-                    foreach ($targetItemsStatePaths as $targetItemStatePath) {
-                        $targetItemRelativeStatePath = $component->getRelativeStatePath($targetItemStatePath);
-
-                        $item = data_get($state, $targetItemRelativeStatePath);
-                        $uuid = Str::afterLast($targetItemRelativeStatePath, '.');
-
-                        $items[$uuid] = $item;
-                    }
-
-                    if (! $relativeStatePath) {
-                        $state = $items;
+                    // Update or create record
+                    if ($record = $cachedExistingRecords->firstWhere($recordKeyName, $recordKey)) {
+                        $record->fill($component->mutateRelationshipDataBeforeSave($data, $record));
                     } else {
-                        data_set($state, $relativeStatePath, $items);
+                        $record = new ($component->getRelatedModel());
+                        $record->fill($component->mutateRelationshipDataBeforeCreate($data));
                     }
 
-                    $component->state($state);
-                },
-            ],
-        ]);
+                    if ($relationship instanceof BelongsToMany) {
+                        // if it's a many-to-many with pivot, we need to recursively walk down to the leaf nodes,
+                        // potentially creating new nodes along the way, before we can then sync the children to the
+                        // pivot on the way back up the tree.
+                        $record->save();
+
+                        if ($children = data_get($item, $childrenKey)) {
+                            $childrenRecords = collect($children)
+                                ->map(fn ($child, $childKey) => $cb($children, $child, $childKey));
+
+                            $record->{$childrenKey}()->syncWithPivotValues(
+                                $childrenRecords->pluck($recordKeyName),
+                                $component->getPivotAttributes() ?? []
+                            );
+                        }
+                    } else {
+                        $record = $relationship->save($record);
+
+                        // Update children
+                        if ($children = data_get($item, $childrenKey)) {
+                            $childrenRecords = collect($children)
+                                ->map(fn ($child, $childKey) => $cb($children, $child, $childKey));
+
+                            $record->{$childrenKey}()->saveMany($childrenRecords);
+                        }
+                    }
+
+                    // Update cached existing records
+                    $cachedExistingRecords->push($record);
+                    $existingItemsIds[] = $record->getKey();
+
+                    return $record;
+                };
+
+                $cb($state, $item, $key);
+            }
+
+            // Delete removed records
+            $cachedExistingRecords
+                ->filter(fn (Model $record) => ! in_array($record->getKey(), $existingItemsIds))
+                ->each(function (Model $record) use ($cachedExistingRecords) {
+                    $record->delete();
+                    $cachedExistingRecords->forget("record-{$record->getKey()}");
+                });
+
+            $component->fillFromRelationship(cached: false);
+        });
+
+        $this->dehydrated(false);
     }
 
-    public function labelKey(string | Closure $key): static
+    public function getRelationship(): HasMany | BelongsToMany
     {
-        $this->labelKey = $key;
+        if ($model = $this->getModelInstance()) {
+            if (! in_array(HasRecursiveRelationships::class, class_uses($model))) {
+                throw new \Exception('The model ' . $model::class . ' must use the ' . HasRecursiveRelationships::class . ' trait.');
+            }
+        }
+
+        return $model->{$this->getRelationshipName()}();
+    }
+
+    public function pivotAttributes(array | Closure | null $pivotAttributes): static
+    {
+        $this->pivotAttributes = $pivotAttributes;
 
         return $this;
     }
 
-    public function getLabelKey(): string
+    public function getPivotAttributes(): ?array
     {
-        return $this->evaluate($this->labelKey);
-    }
-
-    public function childrenKey(string | Closure $key): static
-    {
-        $this->childrenKey = $key;
-
-        return $this;
-    }
-
-    public function getChildrenKey(): string
-    {
-        return $this->evaluate($this->childrenKey);
-    }
-
-    public function maxDepth(int | Closure $maxDepth): static
-    {
-        $this->maxDepth = $maxDepth;
-
-        return $this;
-    }
-
-    public function getMaxDepth(): int
-    {
-        return $this->evaluate($this->maxDepth);
-    }
-
-    public function startCollapsed(bool | Closure $startCollapsed): static
-    {
-        $this->startCollapsed = $startCollapsed;
-
-        return $this;
-    }
-
-    public function getStartCollapsed(): bool
-    {
-        return $this->evaluate($this->startCollapsed);
-    }
-
-    public function getRelativeStatePath(string $path): string
-    {
-        return str($path)->after($this->getStatePath())->trim('.')->toString();
+        return $this->evaluate($this->pivotAttributes);
     }
 }
