@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use Kalnoy\Nestedset\DescendantsRelation;
 
 class NestedSet extends Component
@@ -30,57 +31,59 @@ class NestedSet extends Component
             }
 
             $cachedExistingRecords = $component->getCachedExistingRecords();
-            $existingItemsIds = [];
+            $existingRecordsIds = [];
 
-            $data = collect($state)
-                ->map(
-                    $cb = function (array $item, string $key, array $children = []) use (&$cb, $component, $state, $cachedExistingRecords, &$existingItemsIds): array {
-                        $relationship = $component->getRelationship();
+            $data = Arr::map(
+                $state,
+                $traverse = function (array $item, string $key, array $siblings = []) use (&$traverse, $component, $state, $cachedExistingRecords, &$existingRecordsIds): array {
+                    $relationship = $component->getRelationship();
+                    $childrenKey = $component->getChildrenKey();
+                    $recordKeyName = $relationship->getRelated()->getKeyName();
+                    $recordKey = data_get($item, $recordKeyName);
 
-                        $childrenKey = $component->getChildrenKey();
-                        $recordKeyName = $relationship->getRelated()->getKeyName();
-                        $recordKey = data_get($item, $recordKeyName);
-
-                        // Update item order
-                        if ($orderColumn = $component->getOrderColumn()) {
-                            $item[$orderColumn] = array_search($key, array_keys($children ?: $state));
-                        }
-
-                        // TODO: add ignore columns method
-                        $data = Arr::except($item, [$childrenKey, 'parent_id', '_lft', '_rgt', 'created_at', 'updated_at', 'deleted_at']);
-
-                        // Update or create record
-                        if ($record = $cachedExistingRecords->firstWhere($recordKeyName, $recordKey)) {
-                            $data = $component->mutateRelationshipDataBeforeSave($data, $record);
-                        } else {
-                            $data = $component->mutateRelationshipDataBeforeCreate($data);
-                        }
-
-                        // Update children
-                        if ($children = data_get($item, $childrenKey)) {
-                            $data[$childrenKey] = collect($children)
-                                ->map(fn ($child, $childKey) => $cb($child, $childKey, $children))
-                                ->toArray();
-                        }
-
-                        // Update cached existing records
-                        $existingItemsIds[] = $data[$recordKeyName];
-
-                        return $data;
+                    // Update item order
+                    if ($orderColumn = $component->getOrderColumn()) {
+                        $item[$orderColumn] = array_search($key, array_keys($siblings ?? $state));
                     }
-                )
-                ->toArray();
 
-            $component->getRelatedModel()::rebuildTree($data);
+                    // Remove ignored columns
+                    $data = Arr::except($item, $component->getIgnoredColumns());
 
-            // Delete removed records
-            $cachedExistingRecords
-                ->filter(fn (Model $record) => ! in_array($record->getKey(), $existingItemsIds))
-                ->each(function (Model $record) use ($cachedExistingRecords) {
-                    $record->delete();
-                    $cachedExistingRecords->forget("record-{$record->getKey()}");
-                });
+                    // Update or Create record
+                    if ($record = $cachedExistingRecords->firstWhere($recordKeyName, $recordKey)) {
+                        $data = $component->mutateRelationshipDataBeforeSave($data, $record);
+                    } else {
+                        $data = $component->mutateRelationshipDataBeforeCreate($data);
+                    }
 
+                    // Update children
+                    if ($children = data_get($item, $childrenKey)) {
+                        $data[$childrenKey] = Arr::map($children, fn ($child, $childKey) => $traverse($child, $childKey, $children));
+                    }
+
+                    // Do not delete this item
+                    $existingRecordsIds[] = $recordKey;
+
+                    return $data;
+                }
+            );
+
+            DB::transaction(
+                function () use ($component, $data, $existingRecordsIds, $cachedExistingRecords): void {
+                    // Save tree
+                    $component->getRelatedModel()::rebuildTree($data);
+
+                    // Delete removed records
+                    $cachedExistingRecords
+                        ->reject(fn (Model $record) => in_array($record->getKey(), $existingRecordsIds))
+                        ->each(function (Model $record) use ($cachedExistingRecords) {
+                            $record->delete();
+                            $cachedExistingRecords->forget("record-{$record->getKey()}");
+                        });
+                }
+            );
+
+            // Clear cache
             $component->fillFromRelationship(cached: false);
         });
 
@@ -95,5 +98,18 @@ class NestedSet extends Component
     public function getChildrenKey(): string
     {
         return 'children';
+    }
+
+    public function getIgnoredColumns(): array
+    {
+        return [
+            'children',
+            'parent_id',
+            '_lft',
+            '_rgt',
+            'created_at',
+            'updated_at',
+            'deleted_at',
+        ];
     }
 }

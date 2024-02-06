@@ -33,25 +33,25 @@ class AdjacencyList extends Component
             }
 
             $cachedExistingRecords = $component->getCachedExistingRecords();
-            $existingItemsIds = [];
+            $existingRecordsIds = [];
 
-            foreach ($state as $key => $item) {
-                $cb = function (array $items, array $item, string $key) use (&$cb, $component, $cachedExistingRecords, &$existingItemsIds) {
+            Arr::map(
+                $state,
+                $traverse = function (array $item, string $key, array $siblings = []) use (&$traverse, $component, $state, $cachedExistingRecords, &$existingRecordsIds): Model {
                     $relationship = $component->getRelationship();
-
                     $childrenKey = $component->getChildrenKey();
                     $recordKeyName = $relationship->getRelated()->getKeyName();
                     $recordKey = data_get($item, $recordKeyName);
 
                     // Update item order
                     if ($orderColumn = $component->getOrderColumn()) {
-                        $item[$orderColumn] = array_search($key, array_keys($items));
+                        $item[$orderColumn] = array_search($key, array_keys($siblings ?? $state));
                     }
 
-                    // TODO: add ignore columns method
-                    $data = Arr::except($item, [$recordKeyName, $childrenKey, 'path', 'depth']);
+                    // Remove ignored columns
+                    $data = Arr::except($item, $component->getIgnoredColumns());
 
-                    // Update or create record
+                    // Update or Create record
                     if ($record = $cachedExistingRecords->firstWhere($recordKeyName, $recordKey)) {
                         $record->fill($component->mutateRelationshipDataBeforeSave($data, $record));
                     } else {
@@ -59,15 +59,15 @@ class AdjacencyList extends Component
                         $record->fill($component->mutateRelationshipDataBeforeCreate($data));
                     }
 
+                    // Update children
                     if ($relationship instanceof BelongsToMany) {
-                        // if it's a many-to-many with pivot, we need to recursively walk down to the leaf nodes,
-                        // potentially creating new nodes along the way, before we can then sync the children to the
-                        // pivot on the way back up the tree.
+                        // If it's a many-to-many with pivot, we need to recursively walk down to the
+                        // leaf nodes potentially creating new nodes along the way, before we can
+                        // then sync the children to the pivot on the way back up the tree.
                         $record->save();
 
                         if ($children = data_get($item, $childrenKey)) {
-                            $childrenRecords = collect($children)
-                                ->map(fn ($child, $childKey) => $cb($children, $child, $childKey));
+                            $childrenRecords = collect($children)->map(fn ($child, $childKey) => $traverse($child, $childKey, $children));
 
                             $record->{$childrenKey}()->syncWithPivotValues(
                                 $childrenRecords->pluck($recordKeyName),
@@ -77,33 +77,29 @@ class AdjacencyList extends Component
                     } else {
                         $record = $relationship->save($record);
 
-                        // Update children
                         if ($children = data_get($item, $childrenKey)) {
-                            $childrenRecords = collect($children)
-                                ->map(fn ($child, $childKey) => $cb($children, $child, $childKey));
+                            $childrenRecords = collect($children)->map(fn ($child, $childKey) => $traverse($child, $childKey, $children));
 
                             $record->{$childrenKey}()->saveMany($childrenRecords);
                         }
                     }
 
-                    // Update cached existing records
-                    $cachedExistingRecords->push($record);
-                    $existingItemsIds[] = $record->getKey();
+                    // Do not delete this record
+                    $existingRecordsIds[] = $recordKey;
 
                     return $record;
-                };
-
-                $cb($state, $item, $key);
-            }
+                }
+            );
 
             // Delete removed records
             $cachedExistingRecords
-                ->filter(fn (Model $record) => ! in_array($record->getKey(), $existingItemsIds))
+                ->reject(fn (Model $record) => in_array($record->getKey(), $existingRecordsIds))
                 ->each(function (Model $record) use ($cachedExistingRecords) {
                     $record->delete();
                     $cachedExistingRecords->forget("record-{$record->getKey()}");
                 });
 
+            // Clear cache
             $component->fillFromRelationship(cached: false);
         });
 
@@ -131,5 +127,17 @@ class AdjacencyList extends Component
     public function getPivotAttributes(): ?array
     {
         return $this->evaluate($this->pivotAttributes);
+    }
+
+    public function getIgnoredColumns(): array
+    {
+        return [
+            'children',
+            'path',
+            'depth',
+            'created_at',
+            'updated_at',
+            'deleted_at',
+        ];
     }
 }
