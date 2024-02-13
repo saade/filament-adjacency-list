@@ -17,8 +17,10 @@
         $isDisabled = $isDisabled();
         $isEditable = $isEditable();
         $isReorderable = $isReorderable();
+        $isCollapsible = $isCollapsible();
+        $isCollapsed = $isCollapsed();
         $maxDepth = $getMaxDepth();
-        $startCollapsed = $getStartCollapsed();
+        
         $addAction = $getAction('add');
         $itemActions = [$getAction('addChild'), $getAction('delete'), $getAction('edit'), $getAction('reorder')];
     @endphp
@@ -46,7 +48,8 @@
                     :deletable="$isDeletable"
                     :disabled="$isDisabled"
                     :editable="$isEditable"
-                    :start-collapsed="$startCollapsed"
+                    :is-collapsed="$isCollapsed"
+                    :is-collapsible="$isCollapsible"
                     :item="$item"
                     :item-state-path="$getStatePath() . '.' . $uuid"
                     :label-key="$getLabelKey()"

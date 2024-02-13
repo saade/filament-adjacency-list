@@ -11,6 +11,7 @@ abstract class Component extends Forms\Components\Field
 {
     use Concerns\HasActions;
     use Concerns\HasForm;
+    use Forms\Components\Concerns\CanBeCollapsed;
 
     protected string $view = 'filament-adjacency-list::builder';
 
@@ -108,18 +109,6 @@ abstract class Component extends Forms\Components\Field
     public function getMaxDepth(): int
     {
         return $this->evaluate($this->maxDepth);
-    }
-
-    public function startCollapsed(bool | Closure $startCollapsed): static
-    {
-        $this->startCollapsed = $startCollapsed;
-
-        return $this;
-    }
-
-    public function getStartCollapsed(): bool
-    {
-        return $this->evaluate($this->startCollapsed);
     }
 
     public function getRelativeStatePath(string $path): string

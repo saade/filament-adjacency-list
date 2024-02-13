@@ -1,11 +1,11 @@
-@props(['uuid', 'treeId', 'actions', 'addable', 'childrenKey', 'deletable', 'disabled', 'editable', 'startCollapsed', 'item', 'itemStatePath', 'labelKey', 'reorderable', 'statePath'])
+@props(['uuid', 'treeId', 'actions', 'addable', 'childrenKey', 'isCollapsible', 'isCollapsed', 'deletable', 'disabled', 'editable', 'item', 'itemStatePath', 'labelKey', 'reorderable', 'statePath'])
 
 <div
     {{-- hover:bg-gray-950/5 --}}
     class="pb-3 rounded-lg"
     data-id="{{ $itemStatePath }}"
     data-sortable-item
-    x-data="{ open: $persist(!@js($startCollapsed)) }"
+    x-data="{ isCollapsed: @js($isCollapsed) }"
     wire:key="{{ $itemStatePath }}"
 >
     @php
@@ -34,14 +34,14 @@
                     </div>
                 @endif
 
-                @if ($hasChildren)
+                @if ($isCollapsible && $hasChildren)
                     <button
                         class="px-2 text-gray-500 appearance-none"
                         type="button"
                         title="{{ __('filament-adjacency-list::adjacency-list.actions.toggle-children.label') }}"
-                        x-on:click="open = !open"
+                        x-on:click.stop="isCollapsed = !isCollapsed"
                     >
-                        @svg('heroicon-o-chevron-right', 'w-3.5 h-3.5 transition ease-in-out duration-200 rtl:rotate-180', ['x-bind:class' => "{'ltr:rotate-90 rtl:!rotate-90': open}"])
+                        @svg('heroicon-o-chevron-right', 'w-3.5 h-3.5 transition ease-in-out duration-200 rtl:rotate-180', ['x-bind:class' => "{'ltr:rotate-90 rtl:!rotate-90': !isCollapsed}"])
                     </button>
                 @endif
 
@@ -49,7 +49,7 @@
                     type="button"
                     @class([
                         'w-full py-2 text-left rtl:text-right appearance-none',
-                        'px-4' => !$hasChildren,
+                        'px-4' => !$isCollapsible || !$hasChildren,
                         'cursor-default' => $disabled || !$editable,
                     ])
                     @if ($editable)
@@ -75,7 +75,7 @@
 
     <div
         @class(['ms-6', 'pt-2' => $hasChildren])
-        x-show="open"
+        x-show="! isCollapsed"
         x-collapse
     >
         <div
@@ -97,7 +97,8 @@
                     :deletable="$deletable"
                     :disabled="$disabled"
                     :editable="$editable"
-                    :start-collapsed="$startCollapsed"
+                    :is-collapsed="$isCollapsed"
+                    :is-collapsible="$isCollapsible"
                     :item="$child"
                     :item-state-path="$itemStatePath . '.' . $childrenKey . '.' . $uuid"
                     :label-key="$labelKey"
