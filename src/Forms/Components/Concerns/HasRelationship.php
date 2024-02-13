@@ -52,7 +52,6 @@ trait HasRelationship
             ->mapWithKeys(
                 $cb = function (Model $record) use (&$cb): array {
                     $childrenKey = $this->getChildrenKey();
-                    $recordKeyName = $record->getKeyName();
 
                     $data = $this->mutateRelationshipDataBeforeFill(
                         $this->getLivewire()->makeFilamentTranslatableContentDriver() ?
@@ -60,9 +59,10 @@ trait HasRelationship
                             $record->attributesToArray()
                     );
 
+                    $key = md5('record-' . $record->getKey());
                     $data[$childrenKey] = $record->{$childrenKey}->mapWithKeys($cb)->toArray();
 
-                    return ['record-' . $record->{$recordKeyName} => $data];
+                    return [$key => $data];
                 }
             )
             ->toArray();
@@ -106,7 +106,8 @@ trait HasRelationship
             $relationshipQuery->orderBy($orderColumn);
         }
 
-        return $this->cachedExistingRecords = $relationshipQuery->get();
+        return $this->cachedExistingRecords = $relationshipQuery->get()
+            ->mapWithKeys(fn (Model $record): array => [md5('record-' . $record->getKey()) => $record]);
     }
 
     public function clearCachedExistingRecords(): void

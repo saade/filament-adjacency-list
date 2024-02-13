@@ -12,6 +12,16 @@ trait HasForm
 
     protected array | Closure | null $form = null;
 
+    /**
+     * @param  array<Forms\Component> | Closure | null  $components
+     */
+    public function schema(array | Closure | null $components): static
+    {
+        $this->form($components);
+
+        return $this;
+    }
+
     public function form(array | Closure | null $form): static
     {
         $this->form = $form;

@@ -11,7 +11,7 @@
 >
     @php
         $treeId = $getId();
-
+        
         $isAddable = $isAddable();
         $isDeletable = $isDeletable();
         $isDisabled = $isDisabled();
@@ -38,7 +38,9 @@
             })"
         >
             @forelse($getState() as $uuid => $item)
+                {{-- @dd($this) --}}
                 <x-filament-adjacency-list::item
+                    :uuid="$uuid"
                     :tree-id="$treeId"
                     :actions="$itemActions"
                     :addable="$isAddable"

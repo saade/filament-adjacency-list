@@ -1,30 +1,21 @@
-@props([
-    'treeId',
-    'actions',
-    'addable',
-    'childrenKey',
-    'deletable',
-    'disabled',
-    'editable',
-    'startCollapsed',
-    'item',
-    'itemStatePath',
-    'labelKey',
-    'reorderable',
-    'statePath',
-])
+@props(['uuid', 'treeId', 'actions', 'addable', 'childrenKey', 'deletable', 'disabled', 'editable', 'startCollapsed', 'item', 'itemStatePath', 'labelKey', 'reorderable', 'statePath'])
 
 <div
     class="space-y-2"
     data-id="{{ $itemStatePath }}"
     data-sortable-item
-    x-data="{ open: $persist(! @js($startCollapsed)) }"
+    x-data="{ open: $persist(!@js($startCollapsed)) }"
     wire:key="{{ $itemStatePath }}"
 >
     @php
         [$addChildAction, $deleteAction, $editAction, $reorderAction] = $actions;
-
+        
         $hasChildren = count($item[$childrenKey] ?? []) > 0;
+        
+        $mountArgs = [
+            'statePath' => $itemStatePath,
+            'cachedRecordKey' => $uuid,
+        ];
     @endphp
 
     <div class="relative group">
@@ -38,7 +29,7 @@
                         'flex items-center bg-gray-50 rounded-l-lg rtl:rounded-r-lg border-r rtl:border-r-0 rtl:border-l border-gray-300 px-1',
                         'dark:bg-gray-800 dark:border-white/10',
                     ])>
-                        {{ $reorderAction(['statePath' => $itemStatePath]) }}
+                        {{ $reorderAction($mountArgs) }}
                     </div>
                 @endif
 
@@ -61,7 +52,7 @@
                         'cursor-default' => $disabled || !$editable,
                     ])
                     @if ($editable)
-                        wire:click="mountFormComponentAction(@js($statePath), 'edit', @js(['statePath' => $itemStatePath]))"
+                    wire:click="mountFormComponentAction(@js($statePath), 'edit', @js($mountArgs))"
                     @endif>
                     <span>{{ $item[$labelKey] }}</span>
                 </button>
@@ -69,13 +60,13 @@
 
             <div class="items-center flex-shrink-0 hidden px-2 space-x-2 rtl:space-x-reverse group-hover:flex">
                 @if ($addable)
-                    {{ $addChildAction(['statePath' => $itemStatePath]) }}
+                    {{ $addChildAction($mountArgs) }}
                 @endif
                 @if ($editable)
-                    {{ $editAction(['statePath' => $itemStatePath]) }}
+                    {{ $editAction($mountArgs) }}
                 @endif
                 @if ($deletable)
-                    {{ $deleteAction(['statePath' => $itemStatePath]) }}
+                    {{ $deleteAction($mountArgs) }}
                 @endif
             </div>
         </div>
@@ -98,6 +89,7 @@
         >
             @foreach ($item[$childrenKey] ?? [] as $uuid => $child)
                 <x-filament-adjacency-list::item
+                    :uuid="$uuid"
                     :tree-id="$treeId"
                     :actions="$actions"
                     :addable="$addable"
