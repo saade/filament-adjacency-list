@@ -21,7 +21,7 @@ abstract class Component extends Forms\Components\Field
 
     protected int $maxDepth = -1;
 
-    protected bool $startCollapsed = false;
+    protected bool | Closure $hasRulers = false;
 
     protected function setUp(): void
     {
@@ -109,6 +109,18 @@ abstract class Component extends Forms\Components\Field
     public function getMaxDepth(): int
     {
         return $this->evaluate($this->maxDepth);
+    }
+
+    public function rulers(bool | Closure $condition = true): static
+    {
+        $this->hasRulers = $condition;
+
+        return $this;
+    }
+
+    public function hasRulers(): bool
+    {
+        return $this->evaluate($this->hasRulers);
     }
 
     public function getRelativeStatePath(string $path): string

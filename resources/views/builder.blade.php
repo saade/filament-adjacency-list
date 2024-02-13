@@ -12,6 +12,7 @@
     @php
         $treeId = $getId();
         
+        $hasRulers = $hasRulers();
         $isAddable = $isAddable();
         $isDeletable = $isDeletable();
         $isDisabled = $isDisabled();
@@ -19,6 +20,7 @@
         $isReorderable = $isReorderable();
         $isCollapsible = $isCollapsible();
         $isCollapsed = $isCollapsed();
+        
         $maxDepth = $getMaxDepth();
         
         $addAction = $getAction('add');
@@ -48,6 +50,7 @@
                     :deletable="$isDeletable"
                     :disabled="$isDisabled"
                     :editable="$isEditable"
+                    :has-rulers="$hasRulers"
                     :is-collapsed="$isCollapsed"
                     :is-collapsible="$isCollapsible"
                     :item="$item"

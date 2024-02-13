@@ -1,4 +1,4 @@
-@props(['uuid', 'treeId', 'actions', 'addable', 'childrenKey', 'isCollapsible', 'isCollapsed', 'deletable', 'disabled', 'editable', 'item', 'itemStatePath', 'labelKey', 'reorderable', 'statePath'])
+@props(['uuid', 'treeId', 'actions', 'addable', 'childrenKey', 'hasRulers', 'isCollapsible', 'isCollapsed', 'deletable', 'disabled', 'editable', 'item', 'itemStatePath', 'labelKey', 'reorderable', 'statePath'])
 
 <div
     {{-- hover:bg-gray-950/5 --}}
@@ -74,7 +74,11 @@
     </div>
 
     <div
-        @class(['ms-6', 'pt-2' => $hasChildren])
+        @class([
+            'ms-6' => !$hasRulers,
+            'ms-5 border-l border-l-gray-100 ps-4' => $hasRulers,
+            'pt-2' => $hasChildren,
+        ])
         x-show="! isCollapsed"
         x-collapse
     >
@@ -97,6 +101,7 @@
                     :deletable="$deletable"
                     :disabled="$disabled"
                     :editable="$editable"
+                    :has-rulers="$hasRulers"
                     :is-collapsed="$isCollapsed"
                     :is-collapsible="$isCollapsible"
                     :item="$child"
