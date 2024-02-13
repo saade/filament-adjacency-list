@@ -16,7 +16,8 @@ export default ({
             group: treeId,
             animation: 150,
             fallbackOnBody: true,
-            swapThreshold: 0.50,
+            swapThreshold: 0.25,
+            invertSwap: true,
             draggable: "[data-sortable-item]",
             handle: "[data-sortable-handle]",
             onMove: (evt) => {

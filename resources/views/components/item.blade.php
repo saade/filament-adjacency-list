@@ -1,7 +1,8 @@
 @props(['uuid', 'treeId', 'actions', 'addable', 'childrenKey', 'deletable', 'disabled', 'editable', 'startCollapsed', 'item', 'itemStatePath', 'labelKey', 'reorderable', 'statePath'])
 
 <div
-    class="space-y-2"
+    {{-- hover:bg-gray-950/5 --}}
+    class="pb-3 rounded-lg"
     data-id="{{ $itemStatePath }}"
     data-sortable-item
     x-data="{ open: $persist(!@js($startCollapsed)) }"
@@ -26,7 +27,7 @@
             <div class="flex w-full">
                 @if ($reorderable)
                     <div @class([
-                        'flex items-center bg-gray-50 rounded-l-lg rtl:rounded-r-lg border-r rtl:border-r-0 rtl:border-l border-gray-300 px-1',
+                        'flex items-center bg-gray-50 rounded-l-lg rtl:rounded-r-lg border-r rtl:border-r-0 rtl:border-l border-gray-300 px-2',
                         'dark:bg-gray-800 dark:border-white/10',
                     ])>
                         {{ $reorderAction($mountArgs) }}
@@ -73,12 +74,11 @@
     </div>
 
     <div
-        class="ltr:ml-6 rtl:mr-6"
+        @class(['ms-6', 'pt-2' => $hasChildren])
         x-show="open"
         x-collapse
     >
         <div
-            class="space-y-2"
             wire:key="{{ $itemStatePath }}-children"
             x-data="tree({
                 treeId: @js($treeId),

@@ -25,7 +25,6 @@
 
     <div wire:key="tree-items-wrapper">
         <div
-            class="space-y-2"
             data-sortable-container
             ax-load
             ax-load-css="{{ \Filament\Support\Facades\FilamentAsset::getStyleHref('filament-adjacency-list-styles', 'saade/filament-adjacency-list') }}"
@@ -38,7 +37,6 @@
             })"
         >
             @forelse($getState() as $uuid => $item)
-                {{-- @dd($this) --}}
                 <x-filament-adjacency-list::item
                     :uuid="$uuid"
                     :tree-id="$treeId"
