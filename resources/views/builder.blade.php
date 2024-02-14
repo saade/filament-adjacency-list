@@ -14,18 +14,19 @@
         
         $hasRulers = $hasRulers();
         $isAddable = $isAddable();
+        $isCollapsible = $isCollapsible();
+        $isCollapsed = $isCollapsed();
         $isDeletable = $isDeletable();
         $isDisabled = $isDisabled();
         $isEditable = $isEditable();
         $isIndentable = $isIndentable();
+        $isMoveable = $isMoveable();
         $isReorderable = $isReorderable();
-        $isCollapsible = $isCollapsible();
-        $isCollapsed = $isCollapsed();
         
         $maxDepth = $getMaxDepth();
         
         $addAction = $getAction('add');
-        $itemActions = [$getAction('addChild'), $getAction('delete'), $getAction('edit'), $getAction('reorder'), $getAction('indent'), $getAction('dedent')];
+        $itemActions = [$getAction('addChild'), $getAction('delete'), $getAction('edit'), $getAction('reorder'), $getAction('indent'), $getAction('dedent'), $getAction('moveUp'), $getAction('moveDown')];
     @endphp
 
     <div wire:key="tree-items-wrapper">
@@ -43,26 +44,29 @@
         >
             @forelse($getState() as $uuid => $item)
                 <x-filament-adjacency-list::item
-                    :uuid="$uuid"
-                    :tree-id="$treeId"
                     :actions="$itemActions"
                     :addable="$isAddable"
+                    :ascendable="$isMoveable && !$loop->first"
                     :children-key="$getChildrenKey()"
                     :dedentable="$isIndentable && false"
                     :deletable="$isDeletable"
+                    :descendable="$isMoveable && !$loop->last"
                     :disabled="$isDisabled"
                     :editable="$isEditable"
-                    :indentable="$isIndentable && (!$loop->first && $loop->count > 1)"
                     :has-rulers="$hasRulers"
+                    :indentable="$isIndentable && (!$loop->first && $loop->count > 1)"
                     :is-collapsed="$isCollapsed"
                     :is-collapsible="$isCollapsible"
                     :is-indentable="$isIndentable"
+                    :is-moveable="$isMoveable"
                     :item="$item"
                     :item-state-path="$getStatePath() . '.' . $uuid"
                     :label-key="$getLabelKey()"
+                    :max-depth="$maxDepth"
                     :reorderable="$isReorderable"
                     :state-path="$getStatePath()"
-                    :max-depth="$maxDepth"
+                    :tree-id="$treeId"
+                    :uuid="$uuid"
                 />
             @empty
                 <div @class([

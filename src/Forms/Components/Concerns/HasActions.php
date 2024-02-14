@@ -4,13 +4,7 @@ namespace Saade\FilamentAdjacencyList\Forms\Components\Concerns;
 
 use Closure;
 use Filament\Forms\Components\Actions\Action;
-use Saade\FilamentAdjacencyList\Forms\Components\Actions\AddAction;
-use Saade\FilamentAdjacencyList\Forms\Components\Actions\AddChildAction;
-use Saade\FilamentAdjacencyList\Forms\Components\Actions\DedentAction;
-use Saade\FilamentAdjacencyList\Forms\Components\Actions\DeleteAction;
-use Saade\FilamentAdjacencyList\Forms\Components\Actions\EditAction;
-use Saade\FilamentAdjacencyList\Forms\Components\Actions\IndentAction;
-use Saade\FilamentAdjacencyList\Forms\Components\Actions\ReorderAction;
+use Saade\FilamentAdjacencyList\Forms\Components\Actions;
 
 trait HasActions
 {
@@ -23,6 +17,8 @@ trait HasActions
     protected bool | Closure $isReorderable = true;
 
     protected bool | Closure $isIndentable = true;
+
+    protected bool | Closure $isMoveable = true;
 
     protected ?Closure $modifyAddActionUsing = null;
 
@@ -38,9 +34,13 @@ trait HasActions
 
     protected ?Closure $modifyDedentActionUsing = null;
 
+    protected ?Closure $modifyMoveUpActionUsing = null;
+
+    protected ?Closure $modifyMoveDownActionUsing = null;
+
     public function getAddAction(): Action
     {
-        $action = AddAction::make();
+        $action = Actions\AddAction::make();
 
         if ($this->modifyAddActionUsing) {
             $action = $this->evaluate($this->modifyAddActionUsing, [
@@ -60,7 +60,7 @@ trait HasActions
 
     public function getAddChildAction(): Action
     {
-        $action = AddChildAction::make();
+        $action = Actions\AddChildAction::make();
 
         if ($this->modifyAddChildActionUsing) {
             $action = $this->evaluate($this->modifyAddChildActionUsing, [
@@ -80,7 +80,7 @@ trait HasActions
 
     public function getDeleteAction(): Action
     {
-        $action = DeleteAction::make();
+        $action = Actions\DeleteAction::make();
 
         if ($this->modifydeleteActionUsing) {
             $action = $this->evaluate($this->modifydeleteActionUsing, [
@@ -100,7 +100,7 @@ trait HasActions
 
     public function getEditAction(): Action
     {
-        $action = EditAction::make();
+        $action = Actions\EditAction::make();
 
         if ($this->modifyEditActionUsing) {
             $action = $this->evaluate($this->modifyEditActionUsing, [
@@ -120,7 +120,7 @@ trait HasActions
 
     public function getReorderAction(): Action
     {
-        $action = ReorderAction::make();
+        $action = Actions\ReorderAction::make();
 
         if ($this->modifyReorderActionUsing) {
             $action = $this->evaluate($this->modifyReorderActionUsing, [
@@ -145,7 +145,7 @@ trait HasActions
 
     public function getIndentAction(): Action
     {
-        $action = IndentAction::make();
+        $action = Actions\IndentAction::make();
 
         if ($this->modifyIndentActionUsing) {
             $action = $this->evaluate($this->modifyIndentActionUsing, [
@@ -165,7 +165,7 @@ trait HasActions
 
     public function getDedentAction(): Action
     {
-        $action = DedentAction::make();
+        $action = Actions\DedentAction::make();
 
         if ($this->modifyDedentActionUsing) {
             $action = $this->evaluate($this->modifyDedentActionUsing, [
@@ -179,6 +179,46 @@ trait HasActions
     public function dedentAction(?Closure $callback): static
     {
         $this->modifyDedentActionUsing = $callback;
+
+        return $this;
+    }
+
+    public function getMoveUpAction(): Action
+    {
+        $action = Actions\MoveUpAction::make();
+
+        if ($this->modifyMoveUpActionUsing) {
+            $action = $this->evaluate($this->modifyMoveUpActionUsing, [
+                'action' => $action,
+            ]) ?? $action;
+        }
+
+        return $action;
+    }
+
+    public function moveUpAction(?Closure $callback): static
+    {
+        $this->modifyMoveUpActionUsing = $callback;
+
+        return $this;
+    }
+
+    public function getMoveDownAction(): Action
+    {
+        $action = Actions\MoveDownAction::make();
+
+        if ($this->modifyMoveDownActionUsing) {
+            $action = $this->evaluate($this->modifyMoveDownActionUsing, [
+                'action' => $action,
+            ]) ?? $action;
+        }
+
+        return $action;
+    }
+
+    public function moveDownAction(?Closure $callback): static
+    {
+        $this->modifyMoveDownActionUsing = $callback;
 
         return $this;
     }
@@ -261,5 +301,21 @@ trait HasActions
         }
 
         return (bool) $this->evaluate($this->isIndentable);
+    }
+
+    public function moveable(bool | Closure $condition = true): static
+    {
+        $this->isMoveable = $condition;
+
+        return $this;
+    }
+
+    public function isMoveable(): bool
+    {
+        if ($this->isDisabled()) {
+            return false;
+        }
+
+        return (bool) $this->evaluate($this->isMoveable);
     }
 }

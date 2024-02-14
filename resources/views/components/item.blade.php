@@ -1,4 +1,4 @@
-@props(['uuid', 'treeId', 'actions', 'addable', 'childrenKey', 'dedentable', 'hasRulers', 'indentable', 'isCollapsible', 'isCollapsed', 'isIndentable', 'deletable', 'disabled', 'editable', 'item', 'itemStatePath', 'labelKey', 'reorderable', 'statePath'])
+@props(['actions', 'addable', 'ascendable', 'childrenKey', 'dedentable', 'deletable', 'descendable', 'disabled', 'editable', 'hasRulers', 'indentable', 'isCollapsed', 'isCollapsible', 'isIndentable', 'isMoveable', 'item', 'itemStatePath', 'labelKey', 'maxDepth', 'reorderable', 'statePath', 'treeId', 'uuid'])
 
 <div
     {{-- hover:bg-gray-950/5 --}}
@@ -9,7 +9,7 @@
     wire:key="{{ $itemStatePath }}"
 >
     @php
-        [$addChildAction, $deleteAction, $editAction, $reorderAction, $indentAction, $dedentAction] = $actions;
+        [$addChildAction, $deleteAction, $editAction, $reorderAction, $indentAction, $dedentAction, $moveUpAction, $moveDownAction] = $actions;
         
         $hasChildren = count($item[$childrenKey] ?? []) > 0;
         
@@ -66,6 +66,12 @@
                 @if ($dedentable)
                     {{ $dedentAction($mountArgs) }}
                 @endif
+                @if ($ascendable)
+                    {{ $moveUpAction($mountArgs) }}
+                @endif
+                @if ($descendable)
+                    {{ $moveDownAction($mountArgs) }}
+                @endif
                 @if ($indentable)
                     {{ $indentAction($mountArgs) }}
                 @endif
@@ -96,26 +102,29 @@
         >
             @foreach ($item[$childrenKey] ?? [] as $uuid => $child)
                 <x-filament-adjacency-list::item
-                    :uuid="$uuid"
-                    :tree-id="$treeId"
                     :actions="$actions"
                     :addable="$addable"
+                    :ascendable="$isMoveable && !$loop->first"
                     :children-key="$childrenKey"
-                    :deletable="$deletable"
-                    :disabled="$disabled"
                     :dedentable="$isIndentable && true"
+                    :deletable="$deletable"
+                    :descendable="$isMoveable && !$loop->last"
+                    :disabled="$disabled"
                     :editable="$editable"
-                    :indentable="$isIndentable && (!$loop->first && $loop->count > 1)"
                     :has-rulers="$hasRulers"
+                    :indentable="$isIndentable && (!$loop->first && $loop->count > 1)"
                     :is-collapsed="$isCollapsed"
                     :is-collapsible="$isCollapsible"
                     :is-indentable="$isIndentable"
+                    :is-moveable="$isMoveable"
                     :item="$child"
                     :item-state-path="$itemStatePath . '.' . $childrenKey . '.' . $uuid"
                     :label-key="$labelKey"
+                    :max-depth="$maxDepth"
                     :reorderable="$reorderable"
                     :state-path="$statePath"
-                    :max-depth="$maxDepth"
+                    :tree-id="$treeId"
+                    :uuid="$uuid"
                 />
             @endforeach
         </div>
