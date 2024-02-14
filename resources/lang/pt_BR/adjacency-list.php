@@ -57,6 +57,14 @@ return [
         'dedent' => [
             'label' => 'Desindentar',
         ],
+
+        'moveUp' => [
+            'label' => 'Mover para cima',
+        ],
+
+        'moveDown' => [
+            'label' => 'Mover para baixo',
+        ],
     ],
 
     'items' => [

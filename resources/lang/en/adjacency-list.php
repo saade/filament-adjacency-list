@@ -57,6 +57,14 @@ return [
         'dedent' => [
             'label' => 'Dedent',
         ],
+
+        'moveUp' => [
+            'label' => 'Move up',
+        ],
+
+        'moveDown' => [
+            'label' => 'Move down',
+        ],
     ],
 
     'items' => [
