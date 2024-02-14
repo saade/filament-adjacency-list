@@ -17,6 +17,7 @@
         $isDeletable = $isDeletable();
         $isDisabled = $isDisabled();
         $isEditable = $isEditable();
+        $isIndentable = $isIndentable();
         $isReorderable = $isReorderable();
         $isCollapsible = $isCollapsible();
         $isCollapsed = $isCollapsed();
@@ -24,7 +25,7 @@
         $maxDepth = $getMaxDepth();
         
         $addAction = $getAction('add');
-        $itemActions = [$getAction('addChild'), $getAction('delete'), $getAction('edit'), $getAction('reorder')];
+        $itemActions = [$getAction('addChild'), $getAction('delete'), $getAction('edit'), $getAction('reorder'), $getAction('indent'), $getAction('dedent')];
     @endphp
 
     <div wire:key="tree-items-wrapper">
@@ -47,12 +48,15 @@
                     :actions="$itemActions"
                     :addable="$isAddable"
                     :children-key="$getChildrenKey()"
+                    :dedentable="$isIndentable && false"
                     :deletable="$isDeletable"
                     :disabled="$isDisabled"
                     :editable="$isEditable"
+                    :indentable="$isIndentable && (!$loop->first && $loop->count > 1)"
                     :has-rulers="$hasRulers"
                     :is-collapsed="$isCollapsed"
                     :is-collapsible="$isCollapsible"
+                    :is-indentable="$isIndentable"
                     :item="$item"
                     :item-state-path="$getStatePath() . '.' . $uuid"
                     :label-key="$getLabelKey()"

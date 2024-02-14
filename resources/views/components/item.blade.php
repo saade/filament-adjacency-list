@@ -1,4 +1,4 @@
-@props(['uuid', 'treeId', 'actions', 'addable', 'childrenKey', 'hasRulers', 'isCollapsible', 'isCollapsed', 'deletable', 'disabled', 'editable', 'item', 'itemStatePath', 'labelKey', 'reorderable', 'statePath'])
+@props(['uuid', 'treeId', 'actions', 'addable', 'childrenKey', 'dedentable', 'hasRulers', 'indentable', 'isCollapsible', 'isCollapsed', 'isIndentable', 'deletable', 'disabled', 'editable', 'item', 'itemStatePath', 'labelKey', 'reorderable', 'statePath'])
 
 <div
     {{-- hover:bg-gray-950/5 --}}
@@ -9,7 +9,7 @@
     wire:key="{{ $itemStatePath }}"
 >
     @php
-        [$addChildAction, $deleteAction, $editAction, $reorderAction] = $actions;
+        [$addChildAction, $deleteAction, $editAction, $reorderAction, $indentAction, $dedentAction] = $actions;
         
         $hasChildren = count($item[$childrenKey] ?? []) > 0;
         
@@ -63,8 +63,11 @@
                 @if ($addable)
                     {{ $addChildAction($mountArgs) }}
                 @endif
-                @if ($editable)
-                    {{ $editAction($mountArgs) }}
+                @if ($dedentable)
+                    {{ $dedentAction($mountArgs) }}
+                @endif
+                @if ($indentable)
+                    {{ $indentAction($mountArgs) }}
                 @endif
                 @if ($deletable)
                     {{ $deleteAction($mountArgs) }}
@@ -100,10 +103,13 @@
                     :children-key="$childrenKey"
                     :deletable="$deletable"
                     :disabled="$disabled"
+                    :dedentable="$isIndentable && true"
                     :editable="$editable"
+                    :indentable="$isIndentable && (!$loop->first && $loop->count > 1)"
                     :has-rulers="$hasRulers"
                     :is-collapsed="$isCollapsed"
                     :is-collapsible="$isCollapsible"
+                    :is-indentable="$isIndentable"
                     :item="$child"
                     :item-state-path="$itemStatePath . '.' . $childrenKey . '.' . $uuid"
                     :label-key="$labelKey"

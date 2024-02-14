@@ -49,6 +49,14 @@ return [
         'reorder' => [
             'label' => 'Click and drag to reorder',
         ],
+
+        'indent' => [
+            'label' => 'Indent',
+        ],
+
+        'dedent' => [
+            'label' => 'Dedent',
+        ],
     ],
 
     'items' => [

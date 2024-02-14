@@ -41,6 +41,8 @@ abstract class Component extends Forms\Components\Field
             fn (Component $component): Action => $component->getDeleteAction(),
             fn (Component $component): Action => $component->getEditAction(),
             fn (Component $component): Action => $component->getReorderAction(),
+            fn (Component $component): Action => $component->getIndentAction(),
+            fn (Component $component): Action => $component->getDedentAction(),
         ]);
 
         $this->registerListeners([

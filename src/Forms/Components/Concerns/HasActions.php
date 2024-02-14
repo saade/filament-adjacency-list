@@ -6,8 +6,10 @@ use Closure;
 use Filament\Forms\Components\Actions\Action;
 use Saade\FilamentAdjacencyList\Forms\Components\Actions\AddAction;
 use Saade\FilamentAdjacencyList\Forms\Components\Actions\AddChildAction;
+use Saade\FilamentAdjacencyList\Forms\Components\Actions\DedentAction;
 use Saade\FilamentAdjacencyList\Forms\Components\Actions\DeleteAction;
 use Saade\FilamentAdjacencyList\Forms\Components\Actions\EditAction;
+use Saade\FilamentAdjacencyList\Forms\Components\Actions\IndentAction;
 use Saade\FilamentAdjacencyList\Forms\Components\Actions\ReorderAction;
 
 trait HasActions
@@ -20,6 +22,8 @@ trait HasActions
 
     protected bool | Closure $isReorderable = true;
 
+    protected bool | Closure $isIndentable = true;
+
     protected ?Closure $modifyAddActionUsing = null;
 
     protected ?Closure $modifyAddChildActionUsing = null;
@@ -29,6 +33,10 @@ trait HasActions
     protected ?Closure $modifyEditActionUsing = null;
 
     protected ?Closure $modifyReorderActionUsing = null;
+
+    protected ?Closure $modifyIndentActionUsing = null;
+
+    protected ?Closure $modifyDedentActionUsing = null;
 
     public function getAddAction(): Action
     {
@@ -135,6 +143,46 @@ trait HasActions
         return $this;
     }
 
+    public function getIndentAction(): Action
+    {
+        $action = IndentAction::make();
+
+        if ($this->modifyIndentActionUsing) {
+            $action = $this->evaluate($this->modifyIndentActionUsing, [
+                'action' => $action,
+            ]) ?? $action;
+        }
+
+        return $action;
+    }
+
+    public function indentAction(?Closure $callback): static
+    {
+        $this->modifyIndentActionUsing = $callback;
+
+        return $this;
+    }
+
+    public function getDedentAction(): Action
+    {
+        $action = DedentAction::make();
+
+        if ($this->modifyDedentActionUsing) {
+            $action = $this->evaluate($this->modifyDedentActionUsing, [
+                'action' => $action,
+            ]) ?? $action;
+        }
+
+        return $action;
+    }
+
+    public function dedentAction(?Closure $callback): static
+    {
+        $this->modifyDedentActionUsing = $callback;
+
+        return $this;
+    }
+
     public function addable(bool | Closure $condition = true): static
     {
         $this->isAddable = $condition;
@@ -197,5 +245,21 @@ trait HasActions
         }
 
         return (bool) $this->evaluate($this->isReorderable);
+    }
+
+    public function indentable(bool | Closure $condition = true): static
+    {
+        $this->isIndentable = $condition;
+
+        return $this;
+    }
+
+    public function isIndentable(): bool
+    {
+        if ($this->isDisabled()) {
+            return false;
+        }
+
+        return (bool) $this->evaluate($this->isIndentable);
     }
 }
