@@ -31,10 +31,6 @@ trait HasForm
 
     public function getForm(Form $form): ?Form
     {
-        if (! $this->hasModal()) {
-            return null;
-        }
-
         $modifiedForm = $this->evaluate($this->form);
 
         if ($modifiedForm === null) {

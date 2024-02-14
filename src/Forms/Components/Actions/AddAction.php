@@ -23,9 +23,19 @@ class AddAction extends Action
 
         $this->label(fn (): string => __('filament-adjacency-list::adjacency-list.actions.add.label'));
 
-        $this->modalHeading(fn (): string => __('filament-adjacency-list::adjacency-list.actions.add.modal.heading'));
+        $this->modalHeading(
+            fn (Component $component): ?string => match ($component->hasModal()) {
+                true => __('filament-adjacency-list::adjacency-list.actions.add.modal.heading'),
+                default => null,
+            }
+        );
 
-        $this->modalSubmitActionLabel(fn (): string => __('filament-adjacency-list::adjacency-list.actions.add.modal.actions.create'));
+        $this->modalSubmitActionLabel(
+            fn (Component $component): ?string => match ($component->hasModal()) {
+                true => __('filament-adjacency-list::adjacency-list.actions.add.modal.submit'),
+                default => null,
+            }
+        );
 
         $this->action(
             function (Component $component, array $data): void {
@@ -44,7 +54,10 @@ class AddAction extends Action
         $this->size(ActionSize::Small);
 
         $this->form(
-            fn (Component $component, Form $form) => $component->getForm($form)
+            fn (Component $component, Form $form): ?Form => match ($component->hasModal()) {
+                true => $component->getModalForm($form),
+                default => null,
+            }
         );
 
         $this->visible(
