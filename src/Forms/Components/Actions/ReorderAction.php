@@ -23,7 +23,7 @@ class ReorderAction extends Action
 
         $this->livewireClickHandlerEnabled(false);
 
-        $this->size(ActionSize::Small);
+        $this->size(ActionSize::ExtraSmall);
 
         $this->visible(
             fn (Component $component): bool => $component->isReorderable()

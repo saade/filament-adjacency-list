@@ -27,7 +27,7 @@ class EditAction extends Action implements HasRecord
 
         $this->iconButton()->icon('heroicon-o-pencil-square')->color('gray');
 
-        $this->size(ActionSize::Small);
+        $this->size(ActionSize::ExtraSmall);
 
         $this->modalHeading(fn (): string => __('filament-adjacency-list::adjacency-list.actions.edit.modal.heading'));
 
