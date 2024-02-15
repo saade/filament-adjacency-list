@@ -13,6 +13,8 @@
         
         $hasChildren = count($item[$childrenKey] ?? []) > 0;
         
+        $hitDepthLimit = $maxDepth && substr_count($itemStatePath, $childrenKey) >= $maxDepth;
+        
         $mountArgs = [
             'statePath' => $itemStatePath,
             'cachedRecordKey' => $uuid,
@@ -60,7 +62,7 @@
             </div>
 
             <div class="items-center flex-shrink-0 hidden px-2 space-x-2 rtl:space-x-reverse group-hover:flex">
-                @if ($addable)
+                @if ($addable && !$hitDepthLimit)
                     {{ $addChildAction($mountArgs) }}
                 @endif
                 @if ($dedentable)
@@ -72,7 +74,7 @@
                 @if ($descendable)
                     {{ $moveDownAction($mountArgs) }}
                 @endif
-                @if ($indentable)
+                @if ($indentable && !$hitDepthLimit)
                     {{ $indentAction($mountArgs) }}
                 @endif
                 @if ($deletable)

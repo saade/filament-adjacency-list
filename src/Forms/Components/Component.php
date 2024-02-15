@@ -19,7 +19,7 @@ abstract class Component extends Forms\Components\Field
 
     protected string | Closure $childrenKey = 'children';
 
-    protected int $maxDepth = -1;
+    protected int | Closure | null $maxDepth = null;
 
     protected bool | Closure $hasRulers = false;
 
@@ -110,7 +110,7 @@ abstract class Component extends Forms\Components\Field
         return $this;
     }
 
-    public function getMaxDepth(): int
+    public function getMaxDepth(): ?int
     {
         return $this->evaluate($this->maxDepth);
     }
