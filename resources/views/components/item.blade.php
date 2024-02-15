@@ -2,6 +2,7 @@
 
 <div
     wire:key="{{ $itemStatePath }}"
+    data-id="{{ $itemStatePath }}"
     data-sortable-item
     x-data="{ isCollapsed: @js($isCollapsed) }"
     {{ $attributes->merge(['class' => 'rounded-lg']) }}
