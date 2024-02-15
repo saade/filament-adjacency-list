@@ -2,7 +2,7 @@
 
 <div
     {{-- hover:bg-gray-950/5 --}}
-    class="pb-3 rounded-lg"
+    class="rounded-lg"
     data-id="{{ $itemStatePath }}"
     data-sortable-item
     x-data="{ isCollapsed: @js($isCollapsed) }"
@@ -29,7 +29,7 @@
             <div class="flex w-full">
                 @if ($reorderable)
                     <div @class([
-                        'flex items-center bg-gray-50 rounded-l-lg rtl:rounded-r-lg border-r rtl:border-r-0 rtl:border-l border-gray-300 px-2',
+                        'flex items-center justify-center bg-gray-50 rounded-l-lg rtl:rounded-r-lg border-r rtl:border-r-0 rtl:border-l border-gray-300 px-2 w-10',
                         'dark:bg-gray-800 dark:border-white/10',
                     ])>
                         {{ $reorderAction($mountArgs) }}
@@ -86,9 +86,9 @@
 
     <div
         @class([
-            'ms-6' => !$hasRulers,
-            'ms-5 border-l border-l-gray-100 ps-4' => $hasRulers,
-            'pt-2' => $hasChildren,
+            'ms-5',
+            'border-l border-l-gray-100 ps-5 pt-2' => $hasChildren && $hasRulers,
+            'pb-2' => !$hasChildren,
         ])
         x-show="! isCollapsed"
         x-collapse
