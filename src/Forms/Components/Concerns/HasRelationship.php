@@ -87,6 +87,20 @@ trait HasRelationship
         return $this->evaluate($this->relationship);
     }
 
+    public function cacheRecord(Model $record): void
+    {
+        $this->cachedExistingRecords?->put(md5('record-' . $record->getKey()), $record);
+
+        $this->fillFromRelationship();
+    }
+
+    public function deleteCachedRecord(Model $record): void
+    {
+        $this->cachedExistingRecords?->forget(md5('record-' . $record->getKey()));
+
+        $this->fillFromRelationship();
+    }
+
     public function getCachedExistingRecords(): Collection
     {
         if ($this->cachedExistingRecords) {

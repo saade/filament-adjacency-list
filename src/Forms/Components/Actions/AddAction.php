@@ -33,16 +33,15 @@ class AddAction extends Action
 
         $this->modalSubmitActionLabel(
             fn (Component $component): ?string => match ($component->hasModal()) {
-                true => __('filament-adjacency-list::adjacency-list.actions.add.modal.submit'),
+                true => __('filament-adjacency-list::adjacency-list.actions.add.modal.actions.create'),
                 default => null,
             }
         );
 
         $this->form(
-            fn (Component $component, Form $form, array $arguments): ?Form => match ($component->hasModal()) {
+            fn (Component $component, Form $form): ?Form => match ($component->hasModal()) {
                 true => $component->getForm($form)
-                    ->model($component->getRelatedModel())
-                    ->statePath($arguments['statePath']),
+                    ->model($component->getRelatedModel()),
                 default => null,
             }
         );

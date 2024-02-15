@@ -39,10 +39,9 @@ class AddChildAction extends Action
         );
 
         $this->form(
-            fn (Component $component, Form $form, array $arguments): ?Form => match ($component->hasModal()) {
+            fn (Component $component, Form $form): ?Form => match ($component->hasModal()) {
                 true => $component->getForm($form)
-                    ->model($component->getRelatedModel())
-                    ->statePath($arguments['statePath']),
+                    ->model($component->getRelatedModel()),
                 default => null,
             }
         );

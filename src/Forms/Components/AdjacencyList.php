@@ -32,7 +32,6 @@ class AdjacencyList extends Component
             $action->using(function (Component $component, array $data): void {
                 $relationship = $component->getRelationship();
                 $model = $component->getRelatedModel();
-
                 $pivotData = $component->getPivotAttributes() ?? [];
 
                 if ($relationship instanceof BelongsToMany) {
@@ -51,20 +50,28 @@ class AdjacencyList extends Component
                     $record->fill($data);
                 }
 
+                if ($orderColumn = $component->getOrderColumn()) {
+                    $record->{$orderColumn} = $pivotData[$orderColumn] = count($component->getState());
+                }
+
                 if ($relationship instanceof BelongsToMany) {
                     $record->save();
 
                     $relationship->attach($record, $pivotData);
 
+                    $component->cacheRecord($record);
+
                     return;
                 }
 
                 $relationship->save($record);
+
+                $component->cacheRecord($record);
             });
         });
 
         $this->addChildAction(function (Action $action): void {
-            $action->using(function (Component $component, Model $parentRecord, array $data): void {
+            $action->using(function (Component $component, Model $parentRecord, array $data, array $arguments): void {
                 $relationship = $component->getRelationship();
                 $model = $component->getRelatedModel();
 
@@ -86,6 +93,15 @@ class AdjacencyList extends Component
                     $record->fill($data);
                 }
 
+                if ($orderColumn = $component->getOrderColumn()) {
+                    $record->{$orderColumn} = $pivotData[$orderColumn] = count(
+                        data_get(
+                            $component->getState(),
+                            $component->getRelativeStatePath($arguments['statePath']) . '.' . $component->getChildrenKey()
+                        )
+                    );
+                }
+
                 if ($relationship instanceof BelongsToMany) {
                     $record->save();
 
@@ -94,10 +110,14 @@ class AdjacencyList extends Component
                         $pivotData
                     );
 
+                    $component->cacheRecord($record);
+
                     return;
                 }
 
                 $parentRecord->{$component->getChildrenKey()}()->save($record);
+
+                $component->cacheRecord($record);
             });
         });
 
@@ -145,6 +165,8 @@ class AdjacencyList extends Component
                 }
 
                 $record->delete();
+
+                $component->deleteCachedRecord($record);
             });
         });
 
