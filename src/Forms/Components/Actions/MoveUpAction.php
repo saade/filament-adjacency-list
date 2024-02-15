@@ -2,7 +2,6 @@
 
 namespace Saade\FilamentAdjacencyList\Forms\Components\Actions;
 
-use Filament\Forms\Components\Actions\Action;
 use Filament\Support\Enums\ActionSize;
 use Illuminate\Support\Str;
 use Saade\FilamentAdjacencyList\Forms\Components\Component;

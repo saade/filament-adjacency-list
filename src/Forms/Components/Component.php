@@ -4,8 +4,8 @@ namespace Saade\FilamentAdjacencyList\Forms\Components;
 
 use Closure;
 use Filament\Forms;
-use Filament\Forms\Components\Actions\Action;
 use Illuminate\Support\Str;
+use Saade\FilamentAdjacencyList\Forms\Components\Actions\Action;
 
 abstract class Component extends Forms\Components\Field
 {

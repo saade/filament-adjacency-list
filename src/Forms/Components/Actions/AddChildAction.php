@@ -2,7 +2,6 @@
 
 namespace Saade\FilamentAdjacencyList\Forms\Components\Actions;
 
-use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Form;
 use Filament\Support\Enums\ActionSize;
 use Illuminate\Support\Str;
@@ -23,6 +22,8 @@ class AddChildAction extends Action
 
         $this->label(fn (): string => __('filament-adjacency-list::adjacency-list.actions.add-child.label'));
 
+        $this->size(ActionSize::ExtraSmall);
+
         $this->modalHeading(
             fn (Component $component): ?string => match ($component->hasModal()) {
                 true => __('filament-adjacency-list::adjacency-list.actions.add-child.modal.heading'),
@@ -37,8 +38,19 @@ class AddChildAction extends Action
             }
         );
 
-        $this->action(
-            function (Component $component, array $arguments, array $data): void {
+        $this->form(
+            fn (Component $component, Form $form, array $arguments): ?Form => match ($component->hasModal()) {
+                true => $component->getForm($form)
+                    ->model($component->getRelatedModel())
+                    ->statePath($arguments['statePath']),
+                default => null,
+            }
+        );
+
+        $this->action(function (Component $component, array $arguments): void {
+            $parentRecord = $component->getCachedExistingRecords()->get($arguments['cachedRecordKey']);
+
+            $this->process(function (Component $component, array $arguments, array $data): void {
                 $statePath = $component->getRelativeStatePath($arguments['statePath']);
                 $uuid = (string) Str::uuid();
 
@@ -51,17 +63,8 @@ class AddChildAction extends Action
                 ]);
 
                 $component->state($items);
-            }
-        );
-
-        $this->size(ActionSize::ExtraSmall);
-
-        $this->form(
-            fn (Component $component, Form $form): ?Form => match ($component->hasModal()) {
-                true => $component->getModalForm($form),
-                default => null,
-            }
-        );
+            }, ['parentRecord' => $parentRecord]);
+        });
 
         $this->visible(
             fn (Component $component): bool => $component->isAddable()

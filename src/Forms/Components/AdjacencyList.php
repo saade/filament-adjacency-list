@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Arr;
+use Saade\FilamentAdjacencyList\Forms\Components\Actions\Action;
 use Staudenmeir\LaravelAdjacencyList\Eloquent\HasRecursiveRelationships;
 
 class AdjacencyList extends Component
@@ -27,80 +28,175 @@ class AdjacencyList extends Component
             $component->fillFromRelationship();
         });
 
+        $this->addAction(function (Action $action): void {
+            $action->using(function (Component $component, array $data): void {
+                $relationship = $component->getRelationship();
+                $model = $component->getRelatedModel();
+
+                $pivotData = $component->getPivotAttributes() ?? [];
+
+                if ($relationship instanceof BelongsToMany) {
+                    $pivotColumns = $relationship->getPivotColumns();
+
+                    $pivotData = Arr::only($data, $pivotColumns);
+                    $data = Arr::except($data, $pivotColumns);
+                }
+
+                $data = $component->mutateRelationshipDataBeforeCreate($data);
+
+                if ($translatableContentDriver = $component->getLivewire()->makeFilamentTranslatableContentDriver()) {
+                    $record = $translatableContentDriver->makeRecord($model, $data);
+                } else {
+                    $record = new $model();
+                    $record->fill($data);
+                }
+
+                if ($relationship instanceof BelongsToMany) {
+                    $record->save();
+
+                    $relationship->attach($record, $pivotData);
+
+                    return;
+                }
+
+                $relationship->save($record);
+            });
+        });
+
+        $this->addChildAction(function (Action $action): void {
+            $action->using(function (Component $component, Model $parentRecord, array $data): void {
+                $relationship = $component->getRelationship();
+                $model = $component->getRelatedModel();
+
+                $pivotData = $component->getPivotAttributes() ?? [];
+
+                if ($relationship instanceof BelongsToMany) {
+                    $pivotColumns = $relationship->getPivotColumns();
+
+                    $pivotData = Arr::only($data, $pivotColumns);
+                    $data = Arr::except($data, $pivotColumns);
+                }
+
+                $data = $component->mutateRelationshipDataBeforeCreate($data);
+
+                if ($translatableContentDriver = $component->getLivewire()->makeFilamentTranslatableContentDriver()) {
+                    $record = $translatableContentDriver->makeRecord($model, $data);
+                } else {
+                    $record = new $model();
+                    $record->fill($data);
+                }
+
+                if ($relationship instanceof BelongsToMany) {
+                    $record->save();
+
+                    $parentRecord->{$component->getChildrenKey()}()->syncWithPivotValues(
+                        [$record->getKey()],
+                        $pivotData
+                    );
+
+                    return;
+                }
+
+                $parentRecord->{$component->getChildrenKey()}()->save($record);
+            });
+        });
+
+        $this->editAction(function (Action $action): void {
+            $action->using(function (Component $component, Model $record, array $data): void {
+                $relationship = $component->getRelationship();
+
+                $translatableContentDriver = $component->getLivewire()->makeFilamentTranslatableContentDriver();
+
+                if ($relationship instanceof BelongsToMany) {
+                    $pivot = $record->{$relationship->getPivotAccessor()};
+
+                    $pivotColumns = $relationship->getPivotColumns();
+                    $pivotData = Arr::only($data, $pivotColumns);
+
+                    if (count($pivotColumns)) {
+                        if ($translatableContentDriver) {
+                            $translatableContentDriver->updateRecord($pivot, $pivotData);
+                        } else {
+                            $pivot->update($pivotData);
+                        }
+                    }
+
+                    $data = Arr::except($data, $pivotColumns);
+                }
+
+                $data = $component->mutateRelationshipDataBeforeSave($data, $record);
+
+                if ($translatableContentDriver) {
+                    $translatableContentDriver->updateRecord($record, $data);
+                } else {
+                    $record->update($data);
+                }
+            });
+        });
+
+        $this->deleteAction(function (Action $action): void {
+            $action->using(function (Component $component, Model $record): void {
+                $relationship = $component->getRelationship();
+
+                if ($relationship instanceof BelongsToMany) {
+                    $pivot = $record->{$relationship->getPivotAccessor()};
+
+                    $pivot->delete();
+                }
+
+                $record->delete();
+            });
+        });
+
         $this->saveRelationshipsUsing(static function (AdjacencyList $component, ?array $state) {
             if (! is_array($state)) {
                 $state = [];
             }
 
             $cachedExistingRecords = $component->getCachedExistingRecords();
-            $existingRecordsIds = [];
+            $relationship = $component->getRelationship();
+            $childrenKey = $component->getChildrenKey();
+            $recordKeyName = $relationship->getRelated()->getKeyName();
+            $orderColumn = $component->getOrderColumn();
+            $pivotAttributes = $component->getPivotAttributes();
 
             Arr::map(
                 $state,
-                $traverse = function (array $item, string $key, array $siblings = []) use (&$traverse, $component, $state, $cachedExistingRecords, &$existingRecordsIds): Model {
-                    $relationship = $component->getRelationship();
-                    $childrenKey = $component->getChildrenKey();
-                    $recordKeyName = $relationship->getRelated()->getKeyName();
-                    $recordKey = data_get($item, $recordKeyName);
+                $traverse = function (array $item, string $itemKey, array $siblings = []) use (&$traverse, &$cachedExistingRecords, $state, $relationship, $childrenKey, $recordKeyName, $orderColumn, $pivotAttributes): Model {
+                    $record = $cachedExistingRecords->get($itemKey);
 
-                    // Update item order
-                    if ($orderColumn = $component->getOrderColumn()) {
-                        $item[$orderColumn] = array_search($key, array_keys($siblings ?? $state));
+                    /* Update item order */
+                    if ($orderColumn) {
+                        $record->{$orderColumn} = $pivotAttributes[$orderColumn] = array_search($itemKey, array_keys($siblings ?: $state));
                     }
 
-                    // Remove ignored columns
-                    $data = Arr::except($item, $component->getIgnoredColumns());
-
-                    // Update or Create record
-                    if ($record = $cachedExistingRecords->firstWhere($recordKeyName, $recordKey)) {
-                        $record->fill($component->mutateRelationshipDataBeforeSave($data, $record));
-                    } else {
-                        $record = new ($component->getRelatedModel());
-                        $record->fill($component->mutateRelationshipDataBeforeCreate($data));
-                    }
-
-                    // Update children
                     if ($relationship instanceof BelongsToMany) {
-                        // If it's a many-to-many with pivot, we need to recursively walk down to the
-                        // leaf nodes potentially creating new nodes along the way, before we can
-                        // then sync the children to the pivot on the way back up the tree.
                         $record->save();
+                    } else {
+                        $relationship->save($record);
+                    }
 
-                        if ($children = data_get($item, $childrenKey)) {
-                            $childrenRecords = collect($children)->map(fn ($child, $childKey) => $traverse($child, $childKey, $children));
+                    if ($children = data_get($item, $childrenKey)) {
+                        $childrenRecords = collect($children)->map(fn (array $child, string $childKey) => $traverse($child, $childKey, $children));
 
+                        if ($relationship instanceof BelongsToMany) {
                             $record->{$childrenKey}()->syncWithPivotValues(
                                 $childrenRecords->pluck($recordKeyName),
-                                $component->getPivotAttributes() ?? []
+                                $pivotAttributes()
                             );
-                        }
-                    } else {
-                        $record = $relationship->save($record);
 
-                        if ($children = data_get($item, $childrenKey)) {
-                            $childrenRecords = collect($children)->map(fn ($child, $childKey) => $traverse($child, $childKey, $children));
-
-                            $record->{$childrenKey}()->saveMany($childrenRecords);
+                            return $record;
                         }
+
+                        $record->{$childrenKey}()->saveMany($childrenRecords);
                     }
-
-                    // Do not delete this record
-                    $existingRecordsIds[] = $recordKey;
 
                     return $record;
                 }
             );
 
-            // Delete removed records
-            $cachedExistingRecords
-                ->reject(fn (Model $record) => in_array($record->getKey(), $existingRecordsIds))
-                ->each(function (Model $record) use ($cachedExistingRecords) {
-                    $record->delete();
-                    $cachedExistingRecords->forget("record-{$record->getKey()}");
-                });
-
             // Clear cache
-            $component->fillFromRelationship(cached: false);
+            $component->fillFromRelationship();
         });
 
         $this->dehydrated(false);
@@ -124,20 +220,8 @@ class AdjacencyList extends Component
         return $this;
     }
 
-    public function getPivotAttributes(): ?array
+    public function getPivotAttributes(): array
     {
-        return $this->evaluate($this->pivotAttributes);
-    }
-
-    public function getIgnoredColumns(): array
-    {
-        return [
-            'children',
-            'path',
-            'depth',
-            'created_at',
-            'updated_at',
-            'deleted_at',
-        ];
+        return $this->evaluate($this->pivotAttributes) ?? [];
     }
 }

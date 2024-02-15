@@ -31,10 +31,10 @@ trait HasRelationship
         return $this;
     }
 
-    public function fillFromRelationship(bool $cached = true): void
+    public function fillFromRelationship(): void
     {
         $this->state(
-            $this->getStateFromRelatedRecords($this->getCachedExistingRecords(cached: $cached)),
+            $this->getStateFromRelatedRecords($this->getCachedExistingRecords()),
         );
     }
 
@@ -87,9 +87,9 @@ trait HasRelationship
         return $this->evaluate($this->relationship);
     }
 
-    public function getCachedExistingRecords(bool $cached = true): Collection
+    public function getCachedExistingRecords(): Collection
     {
-        if ($this->cachedExistingRecords && $cached) {
+        if ($this->cachedExistingRecords) {
             return $this->cachedExistingRecords;
         }
 
@@ -142,13 +142,6 @@ trait HasRelationship
         return $data;
     }
 
-    public function mutateRelationshipDataBeforeSaveUsing(?Closure $callback): static
-    {
-        $this->mutateRelationshipDataBeforeSaveUsing = $callback;
-
-        return $this;
-    }
-
     /**
      * @param  array<array<string, mixed>>  $data
      * @return array<array<string, mixed>>
@@ -167,6 +160,13 @@ trait HasRelationship
     public function mutateRelationshipDataBeforeFillUsing(?Closure $callback): static
     {
         $this->mutateRelationshipDataBeforeFillUsing = $callback;
+
+        return $this;
+    }
+
+    public function mutateRelationshipDataBeforeSaveUsing(?Closure $callback): static
+    {
+        $this->mutateRelationshipDataBeforeSaveUsing = $callback;
 
         return $this;
     }

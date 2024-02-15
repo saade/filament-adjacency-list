@@ -2,18 +2,12 @@
 
 namespace Saade\FilamentAdjacencyList\Forms\Components\Actions;
 
-use Filament\Actions\Concerns\InteractsWithRecord;
-use Filament\Actions\Contracts\HasRecord;
-use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Form;
 use Filament\Support\Enums\ActionSize;
-use Illuminate\Database\Eloquent\Model;
 use Saade\FilamentAdjacencyList\Forms\Components\Component;
 
-class EditAction extends Action implements HasRecord
+class EditAction extends Action
 {
-    use InteractsWithRecord;
-
     public static function getDefaultName(): ?string
     {
         return 'edit';
@@ -37,7 +31,7 @@ class EditAction extends Action implements HasRecord
             function (Component $component, Form $form, array $arguments): Form {
                 return $component
                     ->getForm($form)
-                    ->model($this->getRecord() ?? $component->getRelatedModel())
+                    ->model($component->getCachedExistingRecords()->get($arguments['cachedRecordKey']))
                     ->statePath($arguments['statePath']);
             }
         );
@@ -48,14 +42,10 @@ class EditAction extends Action implements HasRecord
             }
         );
 
-        $this->record(
-            function (Component $component, array $arguments): ?Model {
-                return $component->getCachedExistingRecords()->get($arguments['cachedRecordKey']);
-            }
-        );
+        $this->action(function (Component $component, array $arguments): void {
+            $record = $component->getCachedExistingRecords()->get($arguments['cachedRecordKey']);
 
-        $this->action(
-            function (Component $component, array $arguments, array $data): void {
+            $this->process(function (Component $component, array $arguments, array $data): void {
                 $statePath = $component->getRelativeStatePath($arguments['statePath']);
                 $state = $component->getState();
 
@@ -64,8 +54,8 @@ class EditAction extends Action implements HasRecord
                 data_set($state, $statePath, $item);
 
                 $component->state($state);
-            }
-        );
+            }, ['record' => $record]);
+        });
 
         $this->visible(
             function (Component $component): bool {

@@ -3,7 +3,6 @@
 namespace Saade\FilamentAdjacencyList\Forms\Components\Concerns;
 
 use Closure;
-use Filament\Forms\Components\Actions\Action;
 use Saade\FilamentAdjacencyList\Forms\Components\Actions;
 
 trait HasActions
@@ -38,7 +37,7 @@ trait HasActions
 
     protected ?Closure $modifyMoveDownActionUsing = null;
 
-    public function getAddAction(): Action
+    public function getAddAction(): Actions\Action
     {
         $action = Actions\AddAction::make();
 
@@ -58,7 +57,7 @@ trait HasActions
         return $this;
     }
 
-    public function getAddChildAction(): Action
+    public function getAddChildAction(): Actions\Action
     {
         $action = Actions\AddChildAction::make();
 
@@ -78,7 +77,7 @@ trait HasActions
         return $this;
     }
 
-    public function getDeleteAction(): Action
+    public function getDeleteAction(): Actions\Action
     {
         $action = Actions\DeleteAction::make();
 
@@ -98,7 +97,7 @@ trait HasActions
         return $this;
     }
 
-    public function getEditAction(): Action
+    public function getEditAction(): Actions\Action
     {
         $action = Actions\EditAction::make();
 
@@ -118,7 +117,7 @@ trait HasActions
         return $this;
     }
 
-    public function getReorderAction(): Action
+    public function getReorderAction(): Actions\Action
     {
         $action = Actions\ReorderAction::make();
 
@@ -143,7 +142,7 @@ trait HasActions
         return $this;
     }
 
-    public function getIndentAction(): Action
+    public function getIndentAction(): Actions\Action
     {
         $action = Actions\IndentAction::make();
 
@@ -163,7 +162,7 @@ trait HasActions
         return $this;
     }
 
-    public function getDedentAction(): Action
+    public function getDedentAction(): Actions\Action
     {
         $action = Actions\DedentAction::make();
 
@@ -183,7 +182,7 @@ trait HasActions
         return $this;
     }
 
-    public function getMoveUpAction(): Action
+    public function getMoveUpAction(): Actions\Action
     {
         $action = Actions\MoveUpAction::make();
 
@@ -203,7 +202,7 @@ trait HasActions
         return $this;
     }
 
-    public function getMoveDownAction(): Action
+    public function getMoveDownAction(): Actions\Action
     {
         $action = Actions\MoveDownAction::make();
 

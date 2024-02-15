@@ -2,7 +2,6 @@
 
 namespace Saade\FilamentAdjacencyList\Forms\Components\Actions;
 
-use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Form;
 use Filament\Support\Enums\ActionSize;
 use Illuminate\Support\Str;
@@ -23,6 +22,8 @@ class AddAction extends Action
 
         $this->label(fn (): string => __('filament-adjacency-list::adjacency-list.actions.add.label'));
 
+        $this->size(ActionSize::Small);
+
         $this->modalHeading(
             fn (Component $component): ?string => match ($component->hasModal()) {
                 true => __('filament-adjacency-list::adjacency-list.actions.add.modal.heading'),
@@ -37,8 +38,17 @@ class AddAction extends Action
             }
         );
 
-        $this->action(
-            function (Component $component, array $data): void {
+        $this->form(
+            fn (Component $component, Form $form, array $arguments): ?Form => match ($component->hasModal()) {
+                true => $component->getForm($form)
+                    ->model($component->getRelatedModel())
+                    ->statePath($arguments['statePath']),
+                default => null,
+            }
+        );
+
+        $this->action(function (): void {
+            $this->process(function (Component $component, array $data): void {
                 $items = $component->getState();
 
                 $items[(string) Str::uuid()] = [
@@ -48,17 +58,8 @@ class AddAction extends Action
                 ];
 
                 $component->state($items);
-            }
-        );
-
-        $this->size(ActionSize::Small);
-
-        $this->form(
-            fn (Component $component, Form $form): ?Form => match ($component->hasModal()) {
-                true => $component->getModalForm($form),
-                default => null,
-            }
-        );
+            });
+        });
 
         $this->visible(
             fn (Component $component): bool => $component->isAddable()
