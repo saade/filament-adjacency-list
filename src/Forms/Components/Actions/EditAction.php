@@ -2,10 +2,9 @@
 
 namespace Saade\FilamentAdjacencyList\Forms\Components\Actions;
 
-use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Form;
 use Filament\Support\Enums\ActionSize;
-use Saade\FilamentAdjacencyList\Forms\Components\AdjacencyList;
+use Saade\FilamentAdjacencyList\Forms\Components\Component;
 
 class EditAction extends Action
 {
@@ -18,16 +17,35 @@ class EditAction extends Action
     {
         parent::setUp();
 
+        $this->label(fn (): string => __('filament-adjacency-list::adjacency-list.actions.edit.label'));
+
         $this->iconButton()->icon('heroicon-o-pencil-square')->color('gray');
 
-        $this->label(fn (): string => __('filament-adjacency-list::adjacency-list.actions.edit.label'));
+        $this->size(ActionSize::ExtraSmall);
 
         $this->modalHeading(fn (): string => __('filament-adjacency-list::adjacency-list.actions.edit.modal.heading'));
 
         $this->modalSubmitActionLabel(fn (): string => __('filament-adjacency-list::adjacency-list.actions.edit.modal.actions.save'));
 
-        $this->action(
-            function (AdjacencyList $component, array $arguments, array $data): void {
+        $this->form(
+            function (Component $component, Form $form, array $arguments): Form {
+                return $component
+                    ->getForm($form)
+                    ->model($component->getCachedExistingRecords()->get($arguments['cachedRecordKey']))
+                    ->statePath($arguments['statePath']);
+            }
+        );
+
+        $this->fillForm(
+            function (Component $component, array $arguments): array {
+                return data_get($component->getState(), $component->getRelativeStatePath($arguments['statePath']), []);
+            }
+        );
+
+        $this->action(function (Component $component, array $arguments): void {
+            $record = $component->getCachedExistingRecords()->get($arguments['cachedRecordKey']);
+
+            $this->process(function (Component $component, array $arguments, array $data): void {
                 $statePath = $component->getRelativeStatePath($arguments['statePath']);
                 $state = $component->getState();
 
@@ -36,23 +54,13 @@ class EditAction extends Action
                 data_set($state, $statePath, $item);
 
                 $component->state($state);
-            }
-        );
-
-        $this->size(ActionSize::Small);
-
-        $this->form(
-            fn (AdjacencyList $component, Form $form) => $component->getForm($form)
-        );
-
-        $this->mountUsing(
-            fn (AdjacencyList $component, Form $form, array $arguments) => $form->fill(
-                data_get($component->getState(), $component->getRelativeStatePath($arguments['statePath']), [])
-            )
-        );
+            }, ['record' => $record]);
+        });
 
         $this->visible(
-            fn (AdjacencyList $component): bool => $component->isEditable()
+            function (Component $component): bool {
+                return $component->isEditable();
+            }
         );
     }
 }

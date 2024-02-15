@@ -2,11 +2,10 @@
 
 namespace Saade\FilamentAdjacencyList\Forms\Components\Actions;
 
-use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Form;
 use Filament\Support\Enums\ActionSize;
 use Illuminate\Support\Str;
-use Saade\FilamentAdjacencyList\Forms\Components\AdjacencyList;
+use Saade\FilamentAdjacencyList\Forms\Components\Component;
 
 class AddChildAction extends Action
 {
@@ -23,12 +22,34 @@ class AddChildAction extends Action
 
         $this->label(fn (): string => __('filament-adjacency-list::adjacency-list.actions.add-child.label'));
 
-        $this->modalHeading(fn (): string => __('filament-adjacency-list::adjacency-list.actions.add-child.modal.heading'));
+        $this->size(ActionSize::ExtraSmall);
 
-        $this->modalSubmitActionLabel(fn (): string => __('filament-adjacency-list::adjacency-list.actions.add-child.modal.actions.create'));
+        $this->modalHeading(
+            fn (Component $component): ?string => match ($component->hasModal()) {
+                true => __('filament-adjacency-list::adjacency-list.actions.add-child.modal.heading'),
+                default => null,
+            }
+        );
 
-        $this->action(
-            function (AdjacencyList $component, array $arguments, array $data): void {
+        $this->modalSubmitActionLabel(
+            fn (Component $component): ?string => match ($component->hasModal()) {
+                true => __('filament-adjacency-list::adjacency-list.actions.add-child.modal.actions.create'),
+                default => null,
+            }
+        );
+
+        $this->form(
+            fn (Component $component, Form $form): ?Form => match ($component->hasModal()) {
+                true => $component->getForm($form)
+                    ->model($component->getRelatedModel()),
+                default => null,
+            }
+        );
+
+        $this->action(function (Component $component, array $arguments): void {
+            $parentRecord = $component->getCachedExistingRecords()->get($arguments['cachedRecordKey']);
+
+            $this->process(function (Component $component, array $arguments, array $data): void {
                 $statePath = $component->getRelativeStatePath($arguments['statePath']);
                 $uuid = (string) Str::uuid();
 
@@ -41,17 +62,11 @@ class AddChildAction extends Action
                 ]);
 
                 $component->state($items);
-            }
-        );
-
-        $this->size(ActionSize::ExtraSmall);
-
-        $this->form(
-            fn (AdjacencyList $component, Form $form) => $component->getForm($form)
-        );
+            }, ['parentRecord' => $parentRecord]);
+        });
 
         $this->visible(
-            fn (AdjacencyList $component): bool => $component->isAddable()
+            fn (Component $component): bool => $component->isAddable()
         );
     }
 }

@@ -30,11 +30,23 @@ AdjacencyList::make('subjects')
 ```
 
 ## Configuration
-### Customizing the `label` and `children` keys.
+### Customizing the `label` key used to display the item's label
 ```php
 AdjacencyList::make('subjects')
     ->labelKey('name')          // defaults to 'label'
-    ->childrenKey('subitems')   // defaults to 'children'
+```
+
+### Customizing the `children` key used to gather the item's children.
+> **Note:** This is only used when not using relationships.
+```php
+AdjacencyList::make('subjects')
+    ->childrenKey('children')   // defaults to 'children'
+```
+
+### Customizing the `MaxDepth` of the tree.
+```php
+AdjacencyList::make('subjects')
+    ->maxDepth(2)               // defaults to -1 (unlimited depth)
 ```
 
 ### Customizing the `MaxDepth` of the tree.
@@ -69,12 +81,123 @@ AdjacencyList::make('subjects')
     ->deleteAction(fn (Action $action): Action => $action->requiresConfirmation())
     ->reorderAction(fn (Action $action): Action => $action->icon('heroicon-o-arrow-path-rounded-square'))
 ```
-> [!IMPORTANT]
-> **Reorder Action**
-> 
-> If you want to add `->extraAttributes()` to the action, you need to add the `['data-sortable-handle' => 'true']` attribute to the array.
-> 
-> if you want to trigger a livewire action on click, you need to chain `->livewireClickHandlerEnabled()` on the action.
+
+## Relationships
+In this example, we'll be creating a Ticketing system, where tickets can be assigned to a department, and departments have subjects.
+
+### Building the relationship
+```php
+// App/Models/Department.php
+
+class Department extends Model
+{
+    public function subjects(): HasMany
+    {
+        return $this->hasMany(Subject::class)->whereNull('parent_id')->with('children')->orderBy('sort');
+    }
+}
+```
+
+```php
+// App/Models/Subject.php
+
+class Subject extends Model
+{
+    protected $fillable ['parent_id', 'name', 'sort']; // or whatever your columns are
+
+    public function children(): HasMany
+    {
+        return $this->hasMany(Subject::class, 'parent_id')->with('children')->orderBy('sort');
+    }
+}
+```
+
+Now you've created a nested relationship between departments and subjects.
+
+### Using the relationship
+```php
+// App/Filament/Resources/DepartmentResource.php
+
+AdjacencyList::make('subjects')
+    ->relationship('subjects')          // Define the relationship
+    ->labelKey('name')                  // Customize the label key to your model's column
+    ->childrenKey('children')           // Customize the children key to the relationship's method name
+    ->form([                            // Define the form
+        Forms\Components\TextInput::make('name')
+            ->label(__('Name'))
+            ->required(),
+    ]);
+```
+
+That's it! Now you're able to manage your adjacency lists using relationships.
+
+### Working with Staudenmeir's Laravel Adjacency List
+This package also supports [Staudenmeir's Laravel Adjacency List](https://github.com/staudenmeir/laravel-adjacency-list) package.
+
+First, install the package:
+```bash
+composer require staudenmeir/laravel-adjacency-list:"^1.0"
+```
+
+1. Use the `HasRecursiveRelationships` trait in your model, and override the default path separator.
+
+```php
+// App/Models/Department.php
+
+class Department extends Model
+{
+    use \Staudenmeir\LaravelAdjacencyList\Eloquent\HasRecursiveRelationships;
+
+    public function getPathSeparator()
+    {
+        return '.children.';
+    }
+}
+```
+
+If you're already using the HasRecursiveRelationships trait for other parts of your application, it's probably not a good idea to change your model's path separator, since it can break other parts of your application. Instead, you can add as many path separators as you want:
+
+```php
+class Department extends Model
+{
+    use \Staudenmeir\LaravelAdjacencyList\Eloquent\HasRecursiveRelationships;
+
+    public function getCustomPaths()
+    {
+        return [
+            [
+                'name' => 'tree_path',
+                'column' => 'id',
+                'separator' => '.children.',
+            ],
+        ];
+    }
+}
+```
+
+2. Use the `relationship` method to define the relationship:
+
+```php
+AdjacencyList::make('subdepartments')
+    ->relationship('descendants')   // or 'descendantsAndSelf', 'children' ...
+    ->customPath('tree_path')       // if you're using custom paths
+```
+
+That's it! Now you're able to manage your adjacency lists using relationships.
+
+### Customizing the query
+```php
+AdjacencyList::make('subdepartments')
+    ->relationship('descendants', fn (Builder $query): Builder => $query->where('enabled', 1))
+```
+
+### Ordering
+If your application needs to order the items in the list, you can use the `orderColumn` method:
+
+```php
+AdjacencyList::make('subdepartments')
+    ->orderColumn('sort')   // or any other column
+```
 
 ## Changelog
 
@@ -91,7 +214,8 @@ Please review [our security policy](../../security/policy) on how to report secu
 ## Credits
 
 - [Saade](https://github.com/saade)
-- [Ryan Chandler's Navigation Plugin](https://github.com/ryangjchandler/filament-navigation) for the inspiration.
+- [Ryan Chandler's Navigation Plugin](https://github.com/ryangjchandler/filament-navigation) for his work on the tree UI and complex tree actions.
+- [Hugh](https://github.com/cheesegrits) for his help on supporting trees/ graphs relationships.
 - [All Contributors](../../contributors)
 
 ## License

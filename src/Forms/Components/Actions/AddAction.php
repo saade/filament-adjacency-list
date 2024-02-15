@@ -2,11 +2,10 @@
 
 namespace Saade\FilamentAdjacencyList\Forms\Components\Actions;
 
-use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Form;
 use Filament\Support\Enums\ActionSize;
 use Illuminate\Support\Str;
-use Saade\FilamentAdjacencyList\Forms\Components\AdjacencyList;
+use Saade\FilamentAdjacencyList\Forms\Components\Component;
 
 class AddAction extends Action
 {
@@ -23,12 +22,32 @@ class AddAction extends Action
 
         $this->label(fn (): string => __('filament-adjacency-list::adjacency-list.actions.add.label'));
 
-        $this->modalHeading(fn (): string => __('filament-adjacency-list::adjacency-list.actions.add.modal.heading'));
+        $this->size(ActionSize::Small);
 
-        $this->modalSubmitActionLabel(fn (): string => __('filament-adjacency-list::adjacency-list.actions.add.modal.actions.create'));
+        $this->modalHeading(
+            fn (Component $component): ?string => match ($component->hasModal()) {
+                true => __('filament-adjacency-list::adjacency-list.actions.add.modal.heading'),
+                default => null,
+            }
+        );
 
-        $this->action(
-            function (AdjacencyList $component, array $data): void {
+        $this->modalSubmitActionLabel(
+            fn (Component $component): ?string => match ($component->hasModal()) {
+                true => __('filament-adjacency-list::adjacency-list.actions.add.modal.actions.create'),
+                default => null,
+            }
+        );
+
+        $this->form(
+            fn (Component $component, Form $form): ?Form => match ($component->hasModal()) {
+                true => $component->getForm($form)
+                    ->model($component->getRelatedModel()),
+                default => null,
+            }
+        );
+
+        $this->action(function (): void {
+            $this->process(function (Component $component, array $data): void {
                 $items = $component->getState();
 
                 $items[(string) Str::uuid()] = [
@@ -38,17 +57,11 @@ class AddAction extends Action
                 ];
 
                 $component->state($items);
-            }
-        );
-
-        $this->size(ActionSize::Small);
-
-        $this->form(
-            fn (AdjacencyList $component, Form $form) => $component->getForm($form)
-        );
+            });
+        });
 
         $this->visible(
-            fn (AdjacencyList $component): bool => $component->isAddable()
+            fn (Component $component): bool => $component->isAddable()
         );
     }
 }
