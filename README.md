@@ -215,6 +215,7 @@ Please review [our security policy](../../security/policy) on how to report secu
 
 - [Saade](https://github.com/saade)
 - [Ryan Chandler's Navigation Plugin](https://github.com/ryangjchandler/filament-navigation) for his work on the tree UI and complex tree actions.
+- [Hugh](https://github.com/cheesegrits) for his help on supporting trees/ graphs relationships.
 - [All Contributors](../../contributors)
 
 ## License
