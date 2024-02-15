@@ -22,7 +22,7 @@
 
     <div
         class="flex justify-between w-full bg-white border border-gray-300 rounded-lg fi-adjacency-list-item dark:bg-gray-900 dark:border-white/10 group">
-        <div class="flex w-full">
+        <div class="flex">
             @if ($reorderable)
                 <div
                     class="flex items-center justify-center w-10 px-2 border-r border-gray-300 rounded-l-lg bg-gray-50 rtl:rounded-r-lg rtl:border-r-0 rtl:border-l dark:bg-gray-800 dark:border-white/10">
