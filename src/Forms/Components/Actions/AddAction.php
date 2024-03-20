@@ -40,13 +40,13 @@ class AddAction extends Action
 
         $this->form(
             function (Component $component, Form $form): ?Form {
-                if(! $component->hasModal()) {
+                if (! $component->hasModal()) {
                     return null;
                 }
 
                 $form = $component->getForm($form);
 
-                if( $model = $component->getRelatedModel()) {
+                if ($model = $component->getRelatedModel()) {
                     $form->model($model);
                 }
 

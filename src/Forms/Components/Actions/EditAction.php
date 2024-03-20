@@ -33,7 +33,7 @@ class EditAction extends Action
                     ->getForm($form)
                     ->statePath($arguments['statePath']);
 
-                if( $component->getRelatedModel()) {
+                if ($component->getRelatedModel()) {
                     $form->model($component->getCachedExistingRecords()->get($arguments['cachedRecordKey']));
                 }
 
