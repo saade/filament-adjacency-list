@@ -39,10 +39,18 @@ class AddAction extends Action
         );
 
         $this->form(
-            fn (Component $component, Form $form): ?Form => match ($component->hasModal()) {
-                true => $component->getForm($form)
-                    ->model($component->getRelatedModel()),
-                default => null,
+            function (Component $component, Form $form): ?Form {
+                if (! $component->hasModal()) {
+                    return null;
+                }
+
+                $form = $component->getForm($form);
+
+                if ($model = $component->getRelatedModel()) {
+                    $form->model($model);
+                }
+
+                return $form;
             }
         );
 

@@ -29,7 +29,7 @@ class DeleteAction extends Action
         $this->modalSubmitActionLabel(fn (): string => __('filament-adjacency-list::adjacency-list.actions.delete.modal.actions.confirm'));
 
         $this->action(function (Component $component, array $arguments): void {
-            $record = $component->getCachedExistingRecords()->get($arguments['cachedRecordKey']);
+            $record = $component->getRelatedModel() ? $component->getCachedExistingRecords()->get($arguments['cachedRecordKey']) : null;
 
             $this->process(function (Component $component, array $arguments): void {
                 $statePath = $component->getRelativeStatePath($arguments['statePath']);

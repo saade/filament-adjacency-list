@@ -29,10 +29,15 @@ class EditAction extends Action
 
         $this->form(
             function (Component $component, Form $form, array $arguments): Form {
-                return $component
+                $form = $component
                     ->getForm($form)
-                    ->model($component->getCachedExistingRecords()->get($arguments['cachedRecordKey']))
                     ->statePath($arguments['statePath']);
+
+                if ($component->getRelatedModel()) {
+                    $form->model($component->getCachedExistingRecords()->get($arguments['cachedRecordKey']));
+                }
+
+                return $form;
             }
         );
 
@@ -43,7 +48,7 @@ class EditAction extends Action
         );
 
         $this->action(function (Component $component, array $arguments): void {
-            $record = $component->getCachedExistingRecords()->get($arguments['cachedRecordKey']);
+            $record = $component->getRelatedModel() ? $component->getCachedExistingRecords()->get($arguments['cachedRecordKey']) : null;
 
             $this->process(function (Component $component, array $arguments, array $data): void {
                 $statePath = $component->getRelativeStatePath($arguments['statePath']);

@@ -39,15 +39,23 @@ class AddChildAction extends Action
         );
 
         $this->form(
-            fn (Component $component, Form $form): ?Form => match ($component->hasModal()) {
-                true => $component->getForm($form)
-                    ->model($component->getRelatedModel()),
-                default => null,
+            function (Component $component, Form $form): ?Form {
+                if (! $component->hasModal()) {
+                    return null;
+                }
+
+                $form = $component->getForm($form);
+
+                if ($model = $component->getRelatedModel()) {
+                    $form->model($model);
+                }
+
+                return $form;
             }
         );
 
         $this->action(function (Component $component, array $arguments): void {
-            $parentRecord = $component->getCachedExistingRecords()->get($arguments['cachedRecordKey']);
+            $parentRecord = $component->getRelatedModel() ? $component->getCachedExistingRecords()->get($arguments['cachedRecordKey']) : null;
 
             $this->process(function (Component $component, array $arguments, array $data): void {
                 $statePath = $component->getRelativeStatePath($arguments['statePath']);
