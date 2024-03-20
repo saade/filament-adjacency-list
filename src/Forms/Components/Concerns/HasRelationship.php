@@ -289,15 +289,21 @@ trait HasRelationship
         return $this->evaluate($this->orderColumn);
     }
 
-    public function getRelationship(): HasMany | BelongsToMany
+    public function getRelationship(): HasMany | BelongsToMany | null
     {
+        $name = $this->getRelationshipName();
+
+        if (blank($name)) {
+            return null;
+        }
+
         if ($model = $this->getModelInstance()) {
             if (! in_array(HasRecursiveRelationships::class, class_uses($model))) {
                 throw new \Exception('The model ' . $model::class . ' must use the ' . HasRecursiveRelationships::class . ' trait.');
             }
         }
 
-        return $model->{$this->getRelationshipName()}();
+        return $model->{$name}();
     }
 
     public function getRelationshipName(): ?string
@@ -347,9 +353,9 @@ trait HasRelationship
         $this->cachedExistingRecords = null;
     }
 
-    public function getRelatedModel(): string
+    public function getRelatedModel(): ?string
     {
-        return $this->getRelationship()->getModel()::class;
+        return ($model = $this->getRelationship()?->getModel()) ? $model::class : null;
     }
 
     public function mutateRelationshipDataBeforeCreateUsing(?Closure $callback): static
