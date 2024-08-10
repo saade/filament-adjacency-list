@@ -4,27 +4,33 @@ namespace Saade\FilamentAdjacencyList\Forms\Components;
 
 use Closure;
 use Filament\Forms;
-use Filament\Forms\Components\Actions\Action;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Str;
+use Saade\FilamentAdjacencyList\Forms\Components\Actions\Action;
 
-class AdjacencyList extends Forms\Components\Field
+abstract class Component extends Forms\Components\Field
 {
     use Concerns\HasActions;
     use Concerns\HasForm;
+    use Forms\Components\Concerns\CanBeCollapsed;
 
     protected string $view = 'filament-adjacency-list::builder';
 
     protected string | Closure $labelKey = 'label';
 
+    protected string | Closure | null $itemLabel = null;
+
     protected string | Closure $childrenKey = 'children';
 
-    protected int $maxDepth = -1;
+    protected int | Closure | null $maxDepth = null;
+
+    protected bool | Closure $hasRulers = false;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->afterStateHydrated(function (AdjacencyList $component, ?array $state) {
+        $this->afterStateHydrated(function (Component $component, ?array $state) {
             if (! $state) {
                 $component->state([]);
             }
@@ -33,33 +39,41 @@ class AdjacencyList extends Forms\Components\Field
         $this->default([]);
 
         $this->registerActions([
-            fn (AdjacencyList $component): Action => $component->getAddAction(),
-            fn (AdjacencyList $component): Action => $component->getAddChildAction(),
-            fn (AdjacencyList $component): Action => $component->getDeleteAction(),
-            fn (AdjacencyList $component): Action => $component->getEditAction(),
-            fn (AdjacencyList $component): Action => $component->getReorderAction(),
+            fn (Component $component): Action => $component->getAddAction(),
+            fn (Component $component): Action => $component->getAddChildAction(),
+            fn (Component $component): Action => $component->getDeleteAction(),
+            fn (Component $component): Action => $component->getEditAction(),
+            fn (Component $component): Action => $component->getReorderAction(),
+            fn (Component $component): Action => $component->getIndentAction(),
+            fn (Component $component): Action => $component->getDedentAction(),
+            fn (Component $component): Action => $component->getMoveUpAction(),
+            fn (Component $component): Action => $component->getMoveDownAction(),
         ]);
 
         $this->registerListeners([
             'builder::sort' => [
-                function (AdjacencyList $component, string $targetStatePath, array $targetItemsStatePaths) {
+                static function (Component $component, string $targetStatePath, array $targetItemsStatePaths) {
+                    if (! str_starts_with($targetStatePath, $component->getStatePath())) {
+                        return;
+                    }
+
                     $state = $component->getState();
-                    $targetStatePath = $this->getRelativeStatePath($targetStatePath);
+                    $relativeStatePath = $component->getRelativeStatePath($targetStatePath);
 
                     $items = [];
                     foreach ($targetItemsStatePaths as $targetItemStatePath) {
-                        $targetItemStatePath = $this->getRelativeStatePath($targetItemStatePath);
+                        $targetItemRelativeStatePath = $component->getRelativeStatePath($targetItemStatePath);
 
-                        $item = data_get($state, $targetItemStatePath);
-                        $uuid = Str::afterLast($targetItemStatePath, '.');
+                        $item = data_get($state, $targetItemRelativeStatePath);
+                        $uuid = Str::afterLast($targetItemRelativeStatePath, '.');
 
                         $items[$uuid] = $item;
                     }
 
-                    if (! $targetStatePath) {
+                    if (! $relativeStatePath) {
                         $state = $items;
                     } else {
-                        data_set($state, $targetStatePath, $items);
+                        data_set($state, $relativeStatePath, $items);
                     }
 
                     $component->state($state);
@@ -80,6 +94,21 @@ class AdjacencyList extends Forms\Components\Field
         return $this->evaluate($this->labelKey);
     }
 
+    public function itemLabel(string | Closure | null $label): static
+    {
+        $this->itemLabel = $label;
+
+        return $this;
+    }
+    public function getItemLabel(string $uuid): string | Htmlable | null
+    {
+        $container = $this->getChildComponentContainer($uuid);
+        return $this->evaluate($this->itemLabel, [
+            'container' => $container,
+            'state' => $container->getRawState(),
+            'uuid' => $uuid,
+        ]);
+    }
     public function childrenKey(string | Closure $key): static
     {
         $this->childrenKey = $key;
@@ -99,9 +128,21 @@ class AdjacencyList extends Forms\Components\Field
         return $this;
     }
 
-    public function getMaxDepth(): int
+    public function getMaxDepth(): ?int
     {
         return $this->evaluate($this->maxDepth);
+    }
+
+    public function rulers(bool | Closure $condition = true): static
+    {
+        $this->hasRulers = $condition;
+
+        return $this;
+    }
+
+    public function hasRulers(): bool
+    {
+        return $this->evaluate($this->hasRulers);
     }
 
     public function getRelativeStatePath(string $path): string
