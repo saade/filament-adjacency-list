@@ -36,6 +36,13 @@ AdjacencyList::make('subjects')
     ->labelKey('name')          // defaults to 'label'
 ```
 
+### Customizing the `item label` used to display the item's label
+```php
+AdjacencyList::make('subjects')
+    ->itemLabel(fn(array $state, $uuid): ?string => $state[$uuid]['name'] ?? null) // defaults to 'label'
+```
+
+
 ### Customizing the `children` key used to gather the item's children.
 > **Note:** This is only used when not using relationships.
 ```php
