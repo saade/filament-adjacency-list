@@ -4,7 +4,6 @@ namespace Saade\FilamentAdjacencyList\Forms\Components;
 
 use Closure;
 use Filament\Forms;
-use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Str;
 use Saade\FilamentAdjacencyList\Forms\Components\Actions\Action;
 
@@ -12,14 +11,11 @@ abstract class Component extends Forms\Components\Field
 {
     use Concerns\HasActions;
     use Concerns\HasForm;
-    use Concerns\HasRelationship;
     use Forms\Components\Concerns\CanBeCollapsed;
 
     protected string $view = 'filament-adjacency-list::builder';
 
     protected string | Closure $labelKey = 'label';
-
-    protected string | Closure | null $itemLabel = null;
 
     protected string | Closure $childrenKey = 'children';
 
@@ -95,21 +91,6 @@ abstract class Component extends Forms\Components\Field
         return $this->evaluate($this->labelKey);
     }
 
-    public function itemLabel(string | Closure | null $label): static
-    {
-        $this->itemLabel = $label;
-
-        return $this;
-    }
-    public function getItemLabel(string $uuid): string | Htmlable | null
-    {
-        $container = $this->getChildComponentContainer($uuid);
-        return $this->evaluate($this->itemLabel, [
-            'container' => $container,
-            'state' => $container->getRawState(),
-            'uuid' => $uuid,
-        ]);
-    }
     public function childrenKey(string | Closure $key): static
     {
         $this->childrenKey = $key;

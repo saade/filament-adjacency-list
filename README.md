@@ -36,11 +36,24 @@ AdjacencyList::make('subjects')
     ->labelKey('name')          // defaults to 'label'
 ```
 
+### Customizing the `item label` used to display the item's label
+```php
+AdjacencyList::make('subjects')
+    ->itemLabel(fn(array $state, $uuid): ?string => $state[$uuid]['name'] ?? null) // defaults to 'label'
+```
+
+
 ### Customizing the `children` key used to gather the item's children.
 > **Note:** This is only used when not using relationships.
 ```php
 AdjacencyList::make('subjects')
     ->childrenKey('children')   // defaults to 'children'
+```
+
+### Customizing the `MaxDepth` of the tree.
+```php
+AdjacencyList::make('subjects')
+    ->maxDepth(2)               // defaults to -1 (unlimited depth)
 ```
 
 ### Customizing the `MaxDepth` of the tree.
@@ -55,13 +68,15 @@ AdjacencyList::make('subjects')
     ->modal(false)      // defaults to true
 ```
 
-### Disabling creation, edition, deletion, and reordering.
+### Disabling creation, edition, deletion, reordering, moving, and indenting.
 ```php
 AdjacencyList::make('subjects')
     ->addable(false)
     ->editable(false)
     ->deletable(false)
     ->reorderable(false)
+    ->moveable(false)
+    ->indentable(false)
 ```
 
 ### Customizing actions
@@ -75,13 +90,6 @@ AdjacencyList::make('subjects')
     ->deleteAction(fn (Action $action): Action => $action->requiresConfirmation())
     ->reorderAction(fn (Action $action): Action => $action->icon('heroicon-o-arrow-path-rounded-square'))
 ```
-
-> [!IMPORTANT]
-> **Reorder Action**
-> 
-> If you want to add `->extraAttributes()` to the action, you need to add the `'data-sortable-handle' => 'true'` to the array, as the action serves as a handle for SortableJS.
-> 
-> By default, clicking on the action will do anything. If you want to trigger some action on click, you need to chain `->livewireClickHandlerEnabled()` on the action.
 
 ## Relationships
 In this example, we'll be creating a Ticketing system, where tickets can be assigned to a department, and departments have subjects.
