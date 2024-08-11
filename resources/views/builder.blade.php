@@ -11,7 +11,6 @@
 >
     @php
         $treeId = $getId();
-
         $hasRulers = $hasRulers();
         $isAddable = $isAddable();
         $isCollapsible = $isCollapsible();
@@ -22,7 +21,6 @@
         $isIndentable = $isIndentable();
         $isMoveable = $isMoveable();
         $isReorderable = $isReorderable();
-
         $maxDepth = $getMaxDepth();
 
         $addAction = $getAction('add');
