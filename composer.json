@@ -23,7 +23,8 @@
         "php": "^8.1",
         "filament/filament": "^3.0",
         "illuminate/contracts": "^10.0|^11.0",
-        "spatie/laravel-package-tools": "^1.15.0"
+        "spatie/laravel-package-tools": "^1.15.0",
+        "staudenmeir/laravel-adjacency-list": "^1.18"
     },
     "require-dev": {
         "laravel/pint": "^1.0",
@@ -40,13 +41,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Saade\\FilamentAdjacencyList\\": "src/",
-            "Saade\\FilamentAdjacencyList\\Database\\Factories\\": "database/factories/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Saade\\FilamentAdjacencyList\\Tests\\": "tests/"
+            "Saade\\FilamentAdjacencyList\\": "src/"
         }
     },
     "scripts": {
@@ -67,10 +62,7 @@
         "laravel": {
             "providers": [
                 "Saade\\FilamentAdjacencyList\\FilamentAdjacencyListServiceProvider"
-            ],
-            "aliases": {
-                "FilamentAdjacencyList": "Saade\\FilamentAdjacencyList\\Facades\\FilamentAdjacencyList"
-            }
+            ]
         }
     },
     "minimum-stability": "dev",

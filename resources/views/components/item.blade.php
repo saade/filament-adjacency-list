@@ -1,5 +1,6 @@
 @props(['actions', 'addable', 'ascendable','itemLabel', 'childrenKey', 'dedentable', 'deletable', 'descendable', 'disabled', 'editable', 'hasRulers', 'indentable', 'isCollapsed', 'isCollapsible', 'isIndentable', 'isMoveable', 'item', 'itemStatePath', 'labelKey', 'maxDepth', 'reorderable', 'statePath', 'treeId', 'uuid'])
 
+
 <div
     wire:key="{{ $itemStatePath }}"
     data-id="{{ $itemStatePath }}"
@@ -56,6 +57,7 @@
                 @else
                     <span>{{$item[$labelKey] }}</span>
                 @endif
+
             </button>
         </div>
 
