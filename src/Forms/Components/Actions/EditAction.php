@@ -4,6 +4,7 @@ namespace Saade\FilamentAdjacencyList\Forms\Components\Actions;
 
 use Filament\Forms\Form;
 use Filament\Support\Enums\ActionSize;
+use Illuminate\Auth\Access\AuthorizationException;
 use Saade\FilamentAdjacencyList\Forms\Components\Component;
 
 class EditAction extends Action
@@ -67,5 +68,15 @@ class EditAction extends Action
                 return $component->isEditable();
             }
         );
+
+        $this->authorize(function (Component $component, array $arguments): bool {
+            try {
+                $record = $component->getRelatedModel() ? $component->getCachedExistingRecords()->get($arguments['cachedRecordKey']) : null;
+
+                return ! $record || \Filament\authorize('update', $record)->allowed();
+            } catch (AuthorizationException $exception) {
+                return $exception->toResponse()->allowed();
+            }
+        });
     }
 }

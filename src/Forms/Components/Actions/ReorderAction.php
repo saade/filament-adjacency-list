@@ -3,6 +3,7 @@
 namespace Saade\FilamentAdjacencyList\Forms\Components\Actions;
 
 use Filament\Support\Enums\ActionSize;
+use Illuminate\Auth\Access\AuthorizationException;
 use Saade\FilamentAdjacencyList\Forms\Components\Component;
 
 class ReorderAction extends Action
@@ -27,5 +28,15 @@ class ReorderAction extends Action
         $this->visible(
             fn (Component $component): bool => $component->isReorderable()
         );
+
+        $this->authorize(function (Component $component, array $arguments): bool {
+            try {
+                $record = $component->getRelatedModel() ? $component->getCachedExistingRecords()->get($arguments['cachedRecordKey']) : null;
+
+                return ! $record || \Filament\authorize('reorder', $record)->allowed();
+            } catch (AuthorizationException $exception) {
+                return $exception->toResponse()->allowed();
+            }
+        });
     }
 }

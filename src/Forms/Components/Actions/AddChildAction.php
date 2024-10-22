@@ -4,6 +4,7 @@ namespace Saade\FilamentAdjacencyList\Forms\Components\Actions;
 
 use Filament\Forms\Form;
 use Filament\Support\Enums\ActionSize;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Str;
 use Saade\FilamentAdjacencyList\Forms\Components\Component;
 
@@ -76,5 +77,13 @@ class AddChildAction extends Action
         $this->visible(
             fn (Component $component): bool => $component->isAddable()
         );
+
+        $this->authorize(function (Component $component): bool {
+            try {
+                return ! $component->getRelatedModel() || \Filament\authorize('create', $component->getModel())->allowed();
+            } catch (AuthorizationException $exception) {
+                return $exception->toResponse()->allowed();
+            }
+        });
     }
 }

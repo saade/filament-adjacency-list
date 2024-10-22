@@ -3,6 +3,7 @@
 namespace Saade\FilamentAdjacencyList\Forms\Components\Actions;
 
 use Filament\Support\Enums\ActionSize;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Saade\FilamentAdjacencyList\Forms\Components\Component;
@@ -64,5 +65,15 @@ class IndentAction extends Action
         $this->visible(
             fn (Component $component): bool => $component->isIndentable()
         );
+
+        $this->authorize(function (Component $component, array $arguments): bool {
+            try {
+                $record = $component->getRelatedModel() ? $component->getCachedExistingRecords()->get($arguments['cachedRecordKey']) : null;
+
+                return ! $record || \Filament\authorize('update', $record)->allowed();
+            } catch (AuthorizationException $exception) {
+                return $exception->toResponse()->allowed();
+            }
+        });
     }
 }

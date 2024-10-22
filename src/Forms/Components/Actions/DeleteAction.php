@@ -3,6 +3,7 @@
 namespace Saade\FilamentAdjacencyList\Forms\Components\Actions;
 
 use Filament\Support\Enums\ActionSize;
+use Illuminate\Auth\Access\AuthorizationException;
 use Saade\FilamentAdjacencyList\Forms\Components\Component;
 
 class DeleteAction extends Action
@@ -44,5 +45,15 @@ class DeleteAction extends Action
         $this->visible(
             fn (Component $component): bool => $component->isDeletable()
         );
+
+        $this->authorize(function (Component $component, array $arguments): bool {
+            try {
+                $record = $component->getRelatedModel() ? $component->getCachedExistingRecords()->get($arguments['cachedRecordKey']) : null;
+
+                return ! $record || \Filament\authorize('delete', $record)->allowed();
+            } catch (AuthorizationException $exception) {
+                return $exception->toResponse()->allowed();
+            }
+        });
     }
 }
