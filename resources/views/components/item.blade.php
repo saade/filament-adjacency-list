@@ -1,4 +1,4 @@
-@props(['actions', 'addable', 'childrenKey', 'deletable', 'disabled', 'editable', 'item', 'itemStatePath', 'labelKey', 'reorderable', 'statePath'])
+@props(['actions', 'addable', 'childrenKey', 'deletable', 'disabled', 'editable', 'item', 'itemStatePath', 'itemAction', 'labelKey', 'labelFormatter', 'reorderable', 'statePath'])
 
 <div
     class="space-y-2"
@@ -11,6 +11,8 @@
         [$addChildAction, $deleteAction, $editAction, $reorderAction] = $actions;
 
         $hasChildren = count($item[$childrenKey]) > 0;
+
+        $rowAction = $itemAction($item);
     @endphp
 
     <div class="relative group">
@@ -39,17 +41,39 @@
                     </button>
                 @endif
 
-                <button
-                    @class([
-                        'w-full py-2 text-left rtl:text-right appearance-none',
-                        'px-4' => !$hasChildren,
-                        'cursor-default' => $disabled || !$editable,
-                    ])
-                    type="button"
-                    @if($editable) wire:click="mountFormComponentAction(@js($statePath), 'edit', @js(['statePath' => $itemStatePath]))" @endif
-                >
-                    <span>{{ $item[$labelKey] }}</span>
-                </button>
+                @php
+                    $wireClickAction = null;
+
+                    if ($rowAction instanceof \Filament\Forms\Components\Actions\Action) {
+                        $wireClickAction = "mountFormComponentAction(@js($statePath), '{$rowAction->getName()}', @js(['statePath' => $itemStatePath]))";
+                    } elseif ($rowAction) {
+                        $wireClickAction = "mountFormComponentAction(" . Illuminate\Support\Js::from($statePath) . ", '{$rowAction}', " . Illuminate\Support\Js::from(['statePath' => $itemStatePath]) . ")";
+                    } elseif ($editable && $rowAction !== null) {
+                        $wireClickAction = "mountFormComponentAction(" . Illuminate\Support\Js::from($statePath) . ", 'edit', " . Illuminate\Support\Js::from(['statePath' => $itemStatePath]) . ")";
+                    }
+                @endphp
+
+                @if ($wireClickAction)
+                    <button
+                        @class([
+                            'w-full py-2 text-left rtl:text-right appearance-none',
+                            'px-4' => !$hasChildren,
+                        ])
+                        type="button"
+                        wire:click="{{ $wireClickAction }}"
+                    >
+                        {{ $labelFormatter($item) }}
+                    </button>
+                @else
+                    <div
+                        @class([
+                            'w-full py-2 text-left rtl:text-right',
+                            'px-4' => !$hasChildren,
+                        ])
+                    >
+                        {{ $labelFormatter($item) }}
+                    </div>
+                @endif
             </div>
 
             <div class="items-center flex-shrink-0 hidden px-2 space-x-2 rtl:space-x-reverse group-hover:flex">
@@ -84,7 +108,9 @@
                     :editable="$editable"
                     :item="$child"
                     :item-state-path="$itemStatePath . '.' . $childrenKey . '.' . $uuid"
+                    :item-action="$itemAction"
                     :label-key="$labelKey"
+                    :label-formatter="$labelFormatter"
                     :reorderable="$reorderable"
                     :state-path="$statePath"
                     :max-depth="$maxDepth"

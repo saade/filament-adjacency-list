@@ -5,12 +5,16 @@ namespace Saade\FilamentAdjacencyList\Forms\Components;
 use Closure;
 use Filament\Forms;
 use Filament\Forms\Components\Actions\Action;
+use Filament\Forms\Components\Concerns\CanAllowHtml;
 use Illuminate\Support\Str;
 
 class AdjacencyList extends Forms\Components\Field
 {
+    use CanAllowHtml;
+    use Concerns\CanFormatItemLabel;
     use Concerns\HasActions;
     use Concerns\HasForm;
+    use Concerns\HasItemAction;
 
     protected string $view = 'filament-adjacency-list::builder';
 
