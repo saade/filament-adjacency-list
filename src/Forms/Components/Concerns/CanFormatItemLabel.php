@@ -20,11 +20,8 @@ trait CanFormatItemLabel
     public function formatItemLabel(array $item): Htmlable | string | null
     {
         $label = $item[$this->getLabelKey()];
+        $formattedLabel = $this->evaluate($this->formatItemLabel ?? $label, ['label' => $label, 'item' => $item]);
 
-        if ($this->isHtmlAllowed()) {
-            return new HtmlString($this->evaluate($this->formatItemLabel ?? $label, ['label' => $label]));
-        }
-
-        return $this->evaluate($this->formatItemLabel ?? $label, ['label' => $label]);
+        return $this->isHtmlAllowed() ? new HtmlString($formattedLabel) : $formattedLabel;
     }
 }
