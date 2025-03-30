@@ -56,8 +56,8 @@
                 @if ($wireClickAction)
                     <button
                         @class([
-                            'w-full py-2 text-left rtl:text-right appearance-none',
-                            'px-4' => !$hasChildren,
+                            'fi-adjacency-list-label w-full py-2 pe-4 text-left rtl:text-right appearance-none',
+                            'ps-4' => !$hasChildren,
                         ])
                         type="button"
                         wire:click="{{ $wireClickAction }}"
@@ -67,8 +67,8 @@
                 @else
                     <div
                         @class([
-                            'w-full py-2 text-left rtl:text-right',
-                            'px-4' => !$hasChildren,
+                            'fi-adjacency-list-label w-full py-2 pe-4 text-left rtl:text-right',
+                            'ps-4' => !$hasChildren,
                         ])
                     >
                         {{ $labelFormatter($item) }}
