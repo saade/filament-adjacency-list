@@ -1,13 +1,10 @@
-<x-filament-forms::field-wrapper
-    class="filament-navigation"
-    :id="$getId()"
-    :label="$getLabel()"
-    :label-sr-only="$isLabelHidden()"
-    :helper-text="$getHelperText()"
-    :hint="$getHint()"
-    :hint-icon="$getHintIcon()"
-    :required="$isRequired()"
-    :state-path="$getStatePath()"
+<x-dynamic-component
+    :component="$getFieldWrapperView()"
+    :field="$field"
+    :attributes="
+        \Filament\Support\prepare_inherited_attributes($getExtraAttributeBag())
+            ->class(['fi-adjacency-list-wrapper filament-navigation'])
+    "
 >
     @php
         $isAddable = $isAddable();
@@ -71,4 +68,4 @@
             {{ ($addAction)(['statePath' => $getStatePath()]) }}
         @endif
     </div>
-</x-filament-forms::field-wrapper>
+</x-dynamic-component>
