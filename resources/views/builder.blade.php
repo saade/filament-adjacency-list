@@ -26,7 +26,7 @@
 
     <div wire:key="tree-items-wrapper">
         <div
-            class="space-y-2"
+            class="fi-adjacency-list-tree space-y-2"
             data-sortable-container
             ax-load
             ax-load-src="{{ \Filament\Support\Facades\FilamentAsset::getAlpineComponentSrc('filament-adjacency-list', 'saade/filament-adjacency-list') }}"
@@ -54,7 +54,7 @@
                 />
             @empty
                 <div @class([
-                    'w-full bg-white rounded-lg border border-gray-300 px-3 py-2 text-left rtl:text-right',
+                    'fi-adjacency-list-empty w-full bg-white rounded-lg border border-gray-300 px-3 py-2 text-left rtl:text-right',
                     'dark:bg-gray-900 dark:border-white/10',
                 ])>
                     {{ __('filament-adjacency-list::adjacency-list.items.empty') }}

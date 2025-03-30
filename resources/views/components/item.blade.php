@@ -1,7 +1,7 @@
 @props(['actions', 'addable', 'childrenKey', 'deletable', 'disabled', 'editable', 'item', 'itemStatePath', 'labelKey', 'reorderable', 'statePath'])
 
 <div
-    class="space-y-2"
+    class="fi-adjacency-list-root space-y-2"
     data-id="{{ $itemStatePath }}"
     data-sortable-item
     x-data="{ open: $persist(true) }"
@@ -15,7 +15,7 @@
 
     <div class="relative group">
         <div @class([
-            'bg-white rounded-lg border border-gray-300 w-full flex justify-between',
+            'fi-adjacency-list-item bg-white rounded-lg border border-gray-300 w-full flex justify-between',
             'dark:bg-gray-900 dark:border-white/10',
         ])>
             <div class="flex w-full">
@@ -52,7 +52,7 @@
                 </button>
             </div>
 
-            <div class="items-center flex-shrink-0 hidden px-2 space-x-2 rtl:space-x-reverse group-hover:flex">
+            <div class="fi-adjacency-list-actions items-center flex-shrink-0 hidden px-2 space-x-2 rtl:space-x-reverse group-hover:flex">
                 @if($addable) {{ $addChildAction(['statePath' => $itemStatePath]) }} @endif
                 @if($editable) {{ $editAction(['statePath' => $itemStatePath]) }} @endif
                 @if($deletable) {{ $deleteAction(['statePath' => $itemStatePath]) }} @endif
@@ -61,12 +61,12 @@
     </div>
 
     <div
-        class="ltr:ml-6 rtl:mr-6"
+        class="fi-adjacency-list-children ltr:ml-6 rtl:mr-6"
         x-show="open"
         x-collapse
     >
         <div
-            class="space-y-2"
+            class="fi-adjacency-list-items space-y-2"
             wire:key="{{ $itemStatePath }}-children"
             x-data="tree({
                 statePath: @js($itemStatePath . ".$childrenKey"),
