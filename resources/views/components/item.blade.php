@@ -1,4 +1,4 @@
-@props(['actions', 'addable', 'childrenKey', 'deletable', 'disabled', 'editable', 'item', 'itemStatePath', 'labelKey', 'reorderable', 'statePath'])
+@props(['actions', 'addable', 'childrenKey', 'deletable', 'disabled', 'editable', 'item', 'itemStatePath', 'labelKey', 'reorderable', 'statePath', 'maxDepth'])
 
 <div
     class="space-y-2"
@@ -11,6 +11,7 @@
         [$addChildAction, $deleteAction, $editAction, $reorderAction] = $actions;
 
         $hasChildren = count($item[$childrenKey]) > 0;
+        $canHaveChildren = $maxDepth < 0 || Illuminate\Support\Str::substrCount($itemStatePath, '.' . $childrenKey) - 1 < $maxDepth;
     @endphp
 
     <div class="relative group">
@@ -53,7 +54,7 @@
             </div>
 
             <div class="items-center flex-shrink-0 hidden px-2 space-x-2 rtl:space-x-reverse group-hover:flex">
-                @if($addable) {{ $addChildAction(['statePath' => $itemStatePath]) }} @endif
+                @if($addable && $canHaveChildren) {{ $addChildAction(['statePath' => $itemStatePath]) }} @endif
                 @if($editable) {{ $editAction(['statePath' => $itemStatePath]) }} @endif
                 @if($deletable) {{ $deleteAction(['statePath' => $itemStatePath]) }} @endif
             </div>

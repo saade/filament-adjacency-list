@@ -50,8 +50,22 @@ class AddChildAction extends Action
             fn (AdjacencyList $component, Form $form) => $component->getForm($form)
         );
 
-        $this->visible(
-            fn (AdjacencyList $component): bool => $component->isAddable()
-        );
+        $this->visible(function (AdjacencyList $component, array $arguments) {
+            if (! $component->isAddable()) {
+                return false;
+            }
+
+            if (
+                $component->getMaxDepth() >= 0 &&
+                Str::substrCount(
+                    $arguments['statePath'],
+                    '.' . $component->getChildrenKey(),
+                ) - 1 > $component->getMaxDepth()
+            ) {
+                return false;
+            }
+
+            return true;
+        });
     }
 }
