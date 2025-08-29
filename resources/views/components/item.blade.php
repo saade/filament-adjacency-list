@@ -49,7 +49,7 @@
                     'cursor-default' => $disabled || !$editable,
                 ])
                 @if ($editable)
-                wire:click="mountFormComponentAction(@js($statePath), 'edit', @js($mountArgs))"
+                wire:click="{{ $editAction->arguments($mountArgs)->getLivewireClickHandler() }}"
                 @endif>
                 <span>{{ $item[$labelKey] }}</span>
             </button>
