@@ -16,12 +16,14 @@ trait HasItemLabel
         return $this;
     }
 
-    public function getItemLabel(array $item): string | Htmlable | null
+    public function getItemLabel(array $item, string $uuid): string | Htmlable | null
     {
         return $this->evaluate(
             $this->itemLabel,
             namedInjections: [
                 'item' => $item,
+                'key' => $uuid,
+                'uuid' => $uuid,
             ],
         );
     }
