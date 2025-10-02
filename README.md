@@ -69,6 +69,14 @@ AdjacencyList::make('subjects')
     )
 ```
 
+### Customizing the item label using a closure.
+```php
+AdjacencyList::make('subjects')
+    ->itemLabel(
+        fn (array $item): ?string => Page::find($item['data']['id'], ['name'])?->name)
+    )
+```
+
 ### Creating items without a modal.
 ```php
 AdjacencyList::make('subjects')
