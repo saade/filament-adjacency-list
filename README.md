@@ -17,23 +17,15 @@ You can install the package via composer:
 composer require saade/filament-adjacency-list
 ```
 
+<br>
+
 > [!IMPORTANT]
-> In an effort to align with Filament's theming methodology you will need to use a custom theme to use this plugin.
->>  If you have not set up a custom theme and are using a Panel follow the instructions in the Filament Docs first. The following applies to both the Panels Package and the standalone Forms package.
+> If you have not set up a custom theme and are using Filament Panels follow the instructions in the [Filament Docs](https://filamentphp.com/docs/4.x/styling/overview#creating-a-custom-theme) first.
 
-1. Add the plugin's views to your `tailwind.config.js` file.
+After setting up a custom theme add the plugin's views to your theme css file or your app's css file if using the standalone packages.
 
-```js
-content: [
-    ...
-    '<path-to-vendor>/saade/filament-adjacency-list/resources/**/*.blade.php',
-]
-```
-
-2. Rebuild your custom theme.
-
-```sh
-npm run build
+```css
+@source '../../../../vendor/saade/filament-adjacency-list/resources/views/**/*.blade.php';
 ```
 
 ## Usage
