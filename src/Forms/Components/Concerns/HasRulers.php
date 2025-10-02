@@ -6,9 +6,9 @@ use Closure;
 
 trait HasRulers
 {
-    protected bool | Closure $hasRulers = false;
+    protected bool|Closure $hasRulers = false;
 
-    public function rulers(bool | Closure $condition = true): static
+    public function rulers(bool|Closure $condition = true): static
     {
         $this->hasRulers = $condition;
 

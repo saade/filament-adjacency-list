@@ -2,7 +2,7 @@
 
 namespace Saade\FilamentAdjacencyList\Forms\Components\Actions;
 
-use Filament\Support\Enums\ActionSize;
+use Filament\Support\Enums\Size;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
@@ -23,7 +23,7 @@ class IndentAction extends Action
 
         $this->label(fn (): string => __('filament-adjacency-list::adjacency-list.actions.indent.label'));
 
-        $this->size(ActionSize::ExtraSmall);
+        $this->size(Size::ExtraSmall);
 
         $this->action(
             function (Component $component, array $arguments): void {

@@ -6,18 +6,18 @@ use Closure;
 
 trait HasItemUrl
 {
-    protected bool | Closure $shouldOpenItemUrlInNewTab = false;
+    protected bool|Closure $shouldOpenItemUrlInNewTab = false;
 
-    protected string | Closure | null $itemUrl = null;
+    protected string|Closure|null $itemUrl = null;
 
-    public function openItemUrlInNewTab(bool | Closure $condition = true): static
+    public function openItemUrlInNewTab(bool|Closure $condition = true): static
     {
         $this->shouldOpenItemUrlInNewTab = $condition;
 
         return $this;
     }
 
-    public function itemUrl(string | Closure | null $url, bool | Closure $shouldOpenInNewTab = false): static
+    public function itemUrl(string|Closure|null $url, bool|Closure $shouldOpenInNewTab = false): static
     {
         $this->openItemUrlInNewTab($shouldOpenInNewTab);
         $this->itemUrl = $url;

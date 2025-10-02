@@ -3,7 +3,9 @@
 namespace Saade\FilamentAdjacencyList\Forms\Components;
 
 use Filament\Forms;
+use Filament\Support\Components\Attributes\ExposedLivewireMethod;
 use Illuminate\Support\Str;
+use Livewire\Attributes\Renderless;
 use Saade\FilamentAdjacencyList\Forms\Components\Actions\Action;
 
 abstract class Component extends Forms\Components\Field
@@ -11,7 +13,7 @@ abstract class Component extends Forms\Components\Field
     use Concerns\CanBeCollapsed;
     use Concerns\HasActions;
     use Concerns\HasChildrenKey;
-    use Concerns\HasForm;
+    use Concerns\HasSchema;
     use Concerns\HasItemAction;
     use Concerns\HasItemUrl;
     use Concerns\HasLabelKey;
@@ -43,38 +45,37 @@ abstract class Component extends Forms\Components\Field
             fn (Component $component): Action => $component->getMoveUpAction(),
             fn (Component $component): Action => $component->getMoveDownAction(),
         ]);
+    }
 
-        $this->registerListeners([
-            'builder::sort' => [
-                static function (Component $component, string $targetStatePath, array $targetItemsStatePaths) {
-                    if (! str_starts_with($targetStatePath, $component->getStatePath())) {
-                        return;
-                    }
+    #[ExposedLivewireMethod]
+    #[Renderless]
+    public function sort(string $targetStatePath, array $targetItemsStatePaths)
+    {
+        if (! str_starts_with($targetStatePath, $this->getStatePath())) {
+            return;
+        }
 
-                    $state = $component->getState();
-                    $relativeStatePath = $component->getRelativeStatePath($targetStatePath);
+        $state = $this->getState();
+        $relativeStatePath = $this->getRelativeStatePath($targetStatePath);
 
-                    $items = [];
+        $items = [];
 
-                    foreach ($targetItemsStatePaths as $targetItemStatePath) {
-                        $targetItemRelativeStatePath = $component->getRelativeStatePath($targetItemStatePath);
+        foreach ($targetItemsStatePaths as $targetItemStatePath) {
+            $targetItemRelativeStatePath = $this->getRelativeStatePath($targetItemStatePath);
 
-                        $item = data_get($state, $targetItemRelativeStatePath);
-                        $uuid = Str::afterLast($targetItemRelativeStatePath, '.');
+            $item = data_get($state, $targetItemRelativeStatePath);
+            $uuid = Str::afterLast($targetItemRelativeStatePath, '.');
 
-                        $items[$uuid] = $item;
-                    }
+            $items[$uuid] = $item;
+        }
 
-                    if (! $relativeStatePath) {
-                        $state = $items;
-                    } else {
-                        data_set($state, $relativeStatePath, $items);
-                    }
+        if (! $relativeStatePath) {
+            $state = $items;
+        } else {
+            data_set($state, $relativeStatePath, $items);
+        }
 
-                    $component->state($state);
-                },
-            ],
-        ]);
+        $this->state($state);
     }
 
     public function getRelativeStatePath(string $path): string

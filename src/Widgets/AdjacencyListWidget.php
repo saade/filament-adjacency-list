@@ -2,21 +2,27 @@
 
 namespace Saade\FilamentAdjacencyList\Widgets;
 
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
-use Filament\Widgets;
+use Filament\Schemas\Schema;
+use Filament\Support\Concerns\CanBeContained;
+use Filament\Support\Concerns\EvaluatesClosures;
+use Filament\Widgets\Widget;
 use Illuminate\Database\Eloquent\Model;
 use Saade\FilamentAdjacencyList\Forms\Components\AdjacencyList;
 
-/**
- * @property \Filament\Forms\ComponentContainer $form
- */
-class AdjacencyListWidget extends Widgets\Widget implements HasForms
+class AdjacencyListWidget extends Widget implements HasActions, HasForms
 {
+    use CanBeContained;
+    use EvaluatesClosures;
+    use InteractsWithActions;
     use InteractsWithForms;
 
-    protected static string $view = 'filament-adjacency-list::widget';
+    protected string $view = 'filament-adjacency-list::widget';
+
+    protected int|string|array $columnSpan = 'full';
 
     protected static string $relationshipName = 'descendants';
 
@@ -33,9 +39,9 @@ class AdjacencyListWidget extends Widgets\Widget implements HasForms
         );
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
+        return $schema
             ->schema([
                 $this->adjacencyList(
                     $this->makeAdjacencyList()

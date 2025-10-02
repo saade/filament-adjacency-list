@@ -7,17 +7,17 @@ use Saade\FilamentAdjacencyList\Forms\Components\Actions;
 
 trait HasActions
 {
-    protected bool | Closure $isAddable = true;
+    protected bool|Closure $isAddable = true;
 
-    protected bool | Closure $isEditable = true;
+    protected bool|Closure $isEditable = true;
 
-    protected bool | Closure $isDeletable = true;
+    protected bool|Closure $isDeletable = true;
 
-    protected bool | Closure $isReorderable = true;
+    protected bool|Closure $isReorderable = true;
 
-    protected bool | Closure $isIndentable = true;
+    protected bool|Closure $isIndentable = true;
 
-    protected bool | Closure $isMoveable = true;
+    protected bool|Closure $isMoveable = true;
 
     protected ?Closure $modifyAddActionUsing = null;
 
@@ -222,7 +222,7 @@ trait HasActions
         return $this;
     }
 
-    public function addable(bool | Closure $condition = true): static
+    public function addable(bool|Closure $condition = true): static
     {
         $this->isAddable = $condition;
 
@@ -238,7 +238,7 @@ trait HasActions
         return (bool) $this->evaluate($this->isAddable);
     }
 
-    public function deletable(bool | Closure $condition = true): static
+    public function deletable(bool|Closure $condition = true): static
     {
         $this->isDeletable = $condition;
 
@@ -254,7 +254,7 @@ trait HasActions
         return (bool) $this->evaluate($this->isDeletable);
     }
 
-    public function editable(bool | Closure $condition = true): static
+    public function editable(bool|Closure $condition = true): static
     {
         $this->isEditable = $condition;
 
@@ -270,7 +270,7 @@ trait HasActions
         return (bool) $this->evaluate($this->isEditable);
     }
 
-    public function reorderable(bool | Closure $condition = true): static
+    public function reorderable(bool|Closure $condition = true): static
     {
         $this->isReorderable = $condition;
 
@@ -286,7 +286,7 @@ trait HasActions
         return (bool) $this->evaluate($this->isReorderable);
     }
 
-    public function indentable(bool | Closure $condition = true): static
+    public function indentable(bool|Closure $condition = true): static
     {
         $this->isIndentable = $condition;
 
@@ -302,7 +302,7 @@ trait HasActions
         return (bool) $this->evaluate($this->isIndentable);
     }
 
-    public function moveable(bool | Closure $condition = true): static
+    public function moveable(bool|Closure $condition = true): static
     {
         $this->isMoveable = $condition;
 

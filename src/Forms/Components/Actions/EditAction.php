@@ -2,8 +2,8 @@
 
 namespace Saade\FilamentAdjacencyList\Forms\Components\Actions;
 
-use Filament\Forms\Form;
-use Filament\Support\Enums\ActionSize;
+use Filament\Schemas\Schema;
+use Filament\Support\Enums\Size;
 use Illuminate\Auth\Access\AuthorizationException;
 use Saade\FilamentAdjacencyList\Forms\Components\Component;
 
@@ -22,23 +22,23 @@ class EditAction extends Action
 
         $this->iconButton()->icon('heroicon-o-pencil-square')->color('gray');
 
-        $this->size(ActionSize::ExtraSmall);
+        $this->size(Size::ExtraSmall);
 
         $this->modalHeading(fn (): string => __('filament-adjacency-list::adjacency-list.actions.edit.modal.heading'));
 
         $this->modalSubmitActionLabel(fn (): string => __('filament-adjacency-list::adjacency-list.actions.edit.modal.actions.save'));
 
-        $this->form(
-            function (Component $component, Form $form, array $arguments): Form {
-                $form = $component
-                    ->getForm($form)
+        $this->schema(
+            function (Component $component, Schema $schema, array $arguments): Schema {
+                $schema = $component
+                    ->getSchema($schema)
                     ->statePath($arguments['statePath']);
 
                 if ($component->getRelatedModel()) {
-                    $form->model($component->getCachedExistingRecords()->get($arguments['cachedRecordKey']));
+                    $schema->model($component->getCachedExistingRecords()->get($arguments['cachedRecordKey']));
                 }
 
-                return $form;
+                return $schema;
             }
         );
 

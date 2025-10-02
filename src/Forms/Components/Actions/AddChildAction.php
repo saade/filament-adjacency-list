@@ -2,8 +2,8 @@
 
 namespace Saade\FilamentAdjacencyList\Forms\Components\Actions;
 
-use Filament\Forms\Form;
-use Filament\Support\Enums\ActionSize;
+use Filament\Schemas\Schema;
+use Filament\Support\Enums\Size;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Str;
 use Saade\FilamentAdjacencyList\Forms\Components\Component;
@@ -23,7 +23,7 @@ class AddChildAction extends Action
 
         $this->label(fn (): string => __('filament-adjacency-list::adjacency-list.actions.add-child.label'));
 
-        $this->size(ActionSize::ExtraSmall);
+        $this->size(Size::ExtraSmall);
 
         $this->modalHeading(
             fn (Component $component): ?string => match ($component->hasModal()) {
@@ -39,19 +39,19 @@ class AddChildAction extends Action
             }
         );
 
-        $this->form(
-            function (Component $component, Form $form): ?Form {
+        $this->schema(
+            function (Component $component, Schema $schema): ?Schema {
                 if (! $component->hasModal()) {
                     return null;
                 }
 
-                $form = $component->getForm($form);
+                $schema = $component->getSchema($schema);
 
                 if ($model = $component->getRelatedModel()) {
-                    $form->model($model);
+                    $schema->model($model);
                 }
 
-                return $form;
+                return $schema;
             }
         );
 
@@ -64,7 +64,7 @@ class AddChildAction extends Action
 
                 $items = $component->getState();
 
-                data_set($items, ("$statePath." . $component->getChildrenKey() . ".$uuid"), [
+                data_set($items, ("$statePath.".$component->getChildrenKey().".$uuid"), [
                     $component->getLabelKey() => __('filament-adjacency-list::adjacency-list.items.untitled'),
                     $component->getChildrenKey() => [],
                     ...$data,

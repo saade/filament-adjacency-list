@@ -1,4 +1,32 @@
-@props(['actions', 'addable', 'ascendable', 'childrenKey', 'dedentable', 'deletable', 'descendable', 'disabled', 'editable', 'getItemAction', 'getItemUrl', 'hasRulers', 'indentable', 'isCollapsed', 'isCollapsible', 'isIndentable', 'isMoveable', 'item', 'itemStatePath', 'labelKey', 'maxDepth', 'reorderable', 'shouldOpenItemUrlInNewTab', 'statePath', 'treeId', 'uuid'])
+@props([
+    'actions',
+    'addable',
+    'ascendable',
+    'childrenKey',
+    'dedentable',
+    'deletable',
+    'descendable',
+    'disabled',
+    'editable',
+    'getItemAction',
+    'getItemUrl',
+    'hasRulers',
+    'indentable',
+    'isCollapsed',
+    'isCollapsible',
+    'isIndentable',
+    'isMoveable',
+    'item',
+    'itemStatePath',
+    'key',
+    'labelKey',
+    'maxDepth',
+    'reorderable',
+    'shouldOpenItemUrlInNewTab',
+    'statePath',
+    'treeId',
+    'uuid',
+])
 
 <div
     wire:key="{{ $itemStatePath }}"
@@ -8,7 +36,16 @@
     {{ $attributes->merge(['class' => 'rounded-lg mt-1.5']) }}
 >
     @php
-        [$addChildAction, $deleteAction, $editAction, $reorderAction, $indentAction, $dedentAction, $moveUpAction, $moveDownAction] = $actions;
+        [
+            $addChildAction,
+            $deleteAction,
+            $editAction,
+            $reorderAction,
+            $indentAction,
+            $dedentAction,
+            $moveUpAction,
+            $moveDownAction,
+        ] = $actions;
 
         $hasChildren = count($item[$childrenKey] ?? []) > 0;
 
@@ -23,12 +60,12 @@
         $itemClasses = \Illuminate\Support\Arr::toCssClasses([
             'flex-1 py-2 text-left rtl:text-right appearance-none',
             'px-8' => !$isCollapsible || !$hasChildren,
-            'cursor-default' => ($itemAction && $itemUrl === null) && $disabled,
-        ])
+            'cursor-default' => $itemAction && $itemUrl === null && $disabled,
+        ]);
     @endphp
 
     <div
-        class="flex justify-between w-full bg-white border border-gray-300 rounded-lg fi-adjacency-list-item dark:bg-gray-900 dark:border-white/10 group">
+        class="flex justify-between w-full mt-1 bg-white border border-gray-300 rounded-lg fi-adjacency-list-item dark:bg-gray-900 dark:border-white/10 group">
         <div class="flex flex-1">
             @if ($reorderable)
                 <div
@@ -47,8 +84,8 @@
                     @svg('heroicon-o-chevron-right', 'w-3.5 h-3.5 transition ease-in-out duration-200 rtl:rotate-180', ['x-bind:class' => "{'ltr:rotate-90 rtl:!rotate-90': !isCollapsed}"])
                 </button>
             @endif
-                
-            @if($itemUrl && $itemAction === null)
+
+            @if ($itemUrl && $itemAction === null)
                 <a
                     class="{{ $itemClasses }}"
                     {{ \Filament\Support\generate_href_html($itemUrl, $openItemUrlInNewTab) }}
@@ -59,9 +96,7 @@
                 <button
                     type="button"
                     class="{{ $itemClasses }}"
-                    @if(!$disabled)
-                    wire:click="mountFormComponentAction(@js($statePath), @js($itemAction), @js($mountArgs))"
-                    @endif
+                    @if (!$disabled) wire:click="mountAction(@js($itemAction), @js($mountArgs), { schemaComponent: @js($key) })" @endif
                 >
                     <span>{{ $item[$labelKey] }}</span>
                 </button>
@@ -102,11 +137,12 @@
         x-show="! isCollapsed"
         x-collapse
         @class([
-            'fi-adjacency-list-items ms-5 mt-1.5',
+            'fi-adjacency-list-items ms-5',
             'border-l border-l-gray-100 dark:border-l-white/10 ps-5' => $hasRulers,
         ])
         x-data="filamentAdjacencyList({
             treeId: @js($treeId),
+            key: @js($key),
             statePath: @js($itemStatePath . ".$childrenKey"),
             disabled: @js($disabled),
             maxDepth: @js($maxDepth)
@@ -137,6 +173,7 @@
                 :is-moveable="$isMoveable"
                 :item="$child"
                 :item-state-path="$itemStatePath . '.' . $childrenKey . '.' . $uuid"
+                :key="$key"
                 :label-key="$labelKey"
                 :max-depth="$maxDepth"
                 :reorderable="$reorderable"

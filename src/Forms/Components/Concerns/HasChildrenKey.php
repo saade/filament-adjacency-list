@@ -6,9 +6,9 @@ use Closure;
 
 trait HasChildrenKey
 {
-    protected string | Closure $childrenKey = 'children';
+    protected string|Closure $childrenKey = 'children';
 
-    public function childrenKey(string | Closure $key): static
+    public function childrenKey(string|Closure $key): static
     {
         $this->childrenKey = $key;
 
