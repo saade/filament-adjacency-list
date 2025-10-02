@@ -64,7 +64,7 @@ class AddChildAction extends Action
 
                 $items = $component->getState();
 
-                data_set($items, ("$statePath.".$component->getChildrenKey().".$uuid"), [
+                data_set($items, ("$statePath." . $component->getChildrenKey() . ".$uuid"), [
                     $component->getLabelKey() => __('filament-adjacency-list::adjacency-list.items.untitled'),
                     $component->getChildrenKey() => [],
                     ...$data,

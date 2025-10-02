@@ -22,7 +22,7 @@ class AdjacencyListWidget extends Widget implements HasActions, HasForms
 
     protected string $view = 'filament-adjacency-list::widget';
 
-    protected int|string|array $columnSpan = 'full';
+    protected int | string | array $columnSpan = 'full';
 
     protected static string $relationshipName = 'descendants';
 

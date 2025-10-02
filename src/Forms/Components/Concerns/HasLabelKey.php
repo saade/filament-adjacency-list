@@ -6,9 +6,9 @@ use Closure;
 
 trait HasLabelKey
 {
-    protected string|Closure $labelKey = 'label';
+    protected string | Closure $labelKey = 'label';
 
-    public function labelKey(string|Closure $key): static
+    public function labelKey(string | Closure $key): static
     {
         $this->labelKey = $key;
 

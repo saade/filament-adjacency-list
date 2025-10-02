@@ -16,11 +16,11 @@ use Staudenmeir\LaravelAdjacencyList\Eloquent\HasRecursiveRelationships;
 
 trait HasRelationship
 {
-    protected string|Closure|null $relationship = null;
+    protected string | Closure | null $relationship = null;
 
     protected ?Collection $cachedExistingRecords = null;
 
-    protected string|Closure|null $orderColumn = null;
+    protected string | Closure | null $orderColumn = null;
 
     protected ?Closure $modifyRelationshipQueryUsing = null;
 
@@ -30,9 +30,9 @@ trait HasRelationship
 
     protected ?Closure $mutateRelationshipDataBeforeSaveUsing = null;
 
-    protected array|Closure|null $pivotAttributes = null;
+    protected array | Closure | null $pivotAttributes = null;
 
-    public function relationship(string|Closure|null $name = null, ?Closure $modifyQueryUsing = null): static
+    public function relationship(string | Closure | null $name = null, ?Closure $modifyQueryUsing = null): static
     {
         $this->relationship = $name ?? $this->getName();
         $this->modifyRelationshipQueryUsing = $modifyQueryUsing;
@@ -163,7 +163,7 @@ trait HasRelationship
                     $record->{$orderColumn} = $pivotData[$orderColumn] = count(
                         data_get(
                             $component->getState(),
-                            $component->getRelativeStatePath($arguments['statePath']).'.'.$component->getChildrenKey()
+                            $component->getRelativeStatePath($arguments['statePath']) . '.' . $component->getChildrenKey()
                         )
                     );
                 }
@@ -269,7 +269,7 @@ trait HasRelationship
                             $record->attributesToArray()
                     );
 
-                    $key = md5('record-'.$record->getKey());
+                    $key = md5('record-' . $record->getKey());
                     $data[$childrenKey] = $record->{$childrenKey}->mapWithKeys($cb)->toArray();
 
                     return [$key => $data];
@@ -278,7 +278,7 @@ trait HasRelationship
             ->toArray();
     }
 
-    public function orderColumn(string|Closure|null $column = 'sort'): static
+    public function orderColumn(string | Closure | null $column = 'sort'): static
     {
         $this->orderColumn = $column;
 
@@ -290,7 +290,7 @@ trait HasRelationship
         return $this->evaluate($this->orderColumn);
     }
 
-    public function getRelationship(): HasMany|BelongsToMany|null
+    public function getRelationship(): HasMany | BelongsToMany | null
     {
         $name = $this->getRelationshipName();
 
@@ -301,7 +301,7 @@ trait HasRelationship
         if ($model = $this->getModelInstance()) {
             if (! in_array(HasRecursiveRelationships::class, class_uses($model))
             && ! in_array(HasGraphRelationships::class, class_uses($model))) {
-                throw new \Exception('The model '.$model::class.' must use either the '.HasRecursiveRelationships::class.' or '.HasGraphRelationships::class.' trait.');
+                throw new \Exception('The model ' . $model::class . ' must use either the ' . HasRecursiveRelationships::class . ' or ' . HasGraphRelationships::class . ' trait.');
             }
         }
 
@@ -315,14 +315,14 @@ trait HasRelationship
 
     public function cacheRecord(Model $record): void
     {
-        $this->cachedExistingRecords?->put(md5('record-'.$record->getKey()), $record);
+        $this->cachedExistingRecords?->put(md5('record-' . $record->getKey()), $record);
 
         $this->fillFromRelationship();
     }
 
     public function deleteCachedRecord(Model $record): void
     {
-        $this->cachedExistingRecords?->forget(md5('record-'.$record->getKey()));
+        $this->cachedExistingRecords?->forget(md5('record-' . $record->getKey()));
 
         $this->fillFromRelationship();
     }
@@ -347,7 +347,7 @@ trait HasRelationship
         }
 
         return $this->cachedExistingRecords = $relationshipQuery->get()
-            ->mapWithKeys(fn (Model $record): array => [md5('record-'.$record->getKey()) => $record]);
+            ->mapWithKeys(fn (Model $record): array => [md5('record-' . $record->getKey()) => $record]);
     }
 
     public function clearCachedExistingRecords(): void
@@ -434,7 +434,7 @@ trait HasRelationship
         return $data;
     }
 
-    public function pivotAttributes(array|Closure|null $pivotAttributes): static
+    public function pivotAttributes(array | Closure | null $pivotAttributes): static
     {
         $this->pivotAttributes = $pivotAttributes;
 

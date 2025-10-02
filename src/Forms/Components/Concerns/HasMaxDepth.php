@@ -6,9 +6,9 @@ use Closure;
 
 trait HasMaxDepth
 {
-    protected int|Closure|null $maxDepth = null;
+    protected int | Closure | null $maxDepth = null;
 
-    public function maxDepth(int|Closure|null $maxDepth): static
+    public function maxDepth(int | Closure | null $maxDepth): static
     {
         $this->maxDepth = $maxDepth;
 

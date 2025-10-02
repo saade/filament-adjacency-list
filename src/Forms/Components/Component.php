@@ -13,12 +13,12 @@ abstract class Component extends Forms\Components\Field
     use Concerns\CanBeCollapsed;
     use Concerns\HasActions;
     use Concerns\HasChildrenKey;
-    use Concerns\HasSchema;
     use Concerns\HasItemAction;
     use Concerns\HasItemUrl;
     use Concerns\HasLabelKey;
     use Concerns\HasMaxDepth;
     use Concerns\HasRulers;
+    use Concerns\HasSchema;
 
     protected string $view = 'filament-adjacency-list::builder';
 

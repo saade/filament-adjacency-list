@@ -7,9 +7,9 @@ use Filament\Actions\Action;
 
 trait HasItemAction
 {
-    protected string|Closure|null $itemAction = null;
+    protected string | Closure | null $itemAction = null;
 
-    public function itemAction(string|Closure|null $action): static
+    public function itemAction(string | Closure | null $action): static
     {
         $this->itemAction = $action;
 

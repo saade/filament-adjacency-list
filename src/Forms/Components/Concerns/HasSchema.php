@@ -8,14 +8,14 @@ use Filament\Schemas\Schema;
 
 trait HasSchema
 {
-    protected bool|Closure $hasModal = true;
+    protected bool | Closure $hasModal = true;
 
-    protected array|Closure|null $form = null;
+    protected array | Closure | null $form = null;
 
     /**
      * @param  array<Forms\Component> | Closure | null  $components
      */
-    public function schema(array|Closure|null $components): static
+    public function schema(array | Closure | null $components): static
     {
         $this->form($components);
 
@@ -25,7 +25,7 @@ trait HasSchema
     /**
      * @deprecated Use `->schema()` instead.
      */
-    public function form(array|Closure|null $form): static
+    public function form(array | Closure | null $form): static
     {
         $this->form = $form;
 
@@ -58,7 +58,7 @@ trait HasSchema
         return $modifiedForm;
     }
 
-    public function modal(bool|Closure $condition = true): static
+    public function modal(bool | Closure $condition = true): static
     {
         $this->hasModal = $condition;
 
