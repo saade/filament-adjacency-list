@@ -4,9 +4,9 @@ namespace Saade\FilamentAdjacencyList\Forms\Components\Concerns;
 
 use Closure;
 use Filament\Forms;
-use Filament\Forms\Form;
+use Filament\Schemas\Schema;
 
-trait HasForm
+trait HasSchema
 {
     protected bool | Closure $hasModal = true;
 
@@ -22,6 +22,9 @@ trait HasForm
         return $this;
     }
 
+    /**
+     * @deprecated Use `->schema()` instead.
+     */
     public function form(array | Closure | null $form): static
     {
         $this->form = $form;
@@ -29,12 +32,12 @@ trait HasForm
         return $this;
     }
 
-    public function getForm(Form $form): ?Form
+    public function getSchema(Schema $schema): ?Schema
     {
         $modifiedForm = $this->evaluate($this->form);
 
         if ($modifiedForm === null) {
-            return $form->schema([
+            return $schema->schema([
                 Forms\Components\TextInput::make($this->getLabelKey())
                     ->label(__('filament-adjacency-list::adjacency-list.items.label')),
             ]);
@@ -45,7 +48,7 @@ trait HasForm
         }
 
         if (is_array($modifiedForm)) {
-            $modifiedForm = $form->schema($modifiedForm);
+            $modifiedForm = $schema->schema($modifiedForm);
         }
 
         if ($this->isDisabled()) {

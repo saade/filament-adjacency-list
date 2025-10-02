@@ -2,7 +2,7 @@
 
 namespace Saade\FilamentAdjacencyList\Forms\Components\Actions;
 
-use Filament\Support\Enums\ActionSize;
+use Filament\Support\Enums\Size;
 use Illuminate\Auth\Access\AuthorizationException;
 use Saade\FilamentAdjacencyList\Forms\Components\Component;
 
@@ -21,7 +21,7 @@ class DeleteAction extends Action
 
         $this->label(fn (): string => __('filament-adjacency-list::adjacency-list.actions.delete.label'));
 
-        $this->size(ActionSize::ExtraSmall);
+        $this->size(Size::ExtraSmall);
 
         $this->modalIcon('heroicon-o-trash');
 

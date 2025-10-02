@@ -3,7 +3,6 @@
     :id="$getId()"
     :label="$getLabel()"
     :label-sr-only="$isLabelHidden()"
-    :helper-text="$getHelperText()"
     :hint="$getHint()"
     :hint-icon="$getHintIcon()"
     :required="$isRequired()"
@@ -11,6 +10,7 @@
 >
     @php
         $treeId = $getId();
+        $key = $getKey();
 
         $hasRulers = $hasRulers();
         $isAddable = $isAddable();
@@ -33,10 +33,11 @@
         x-ignore
         class="fi-adjacency-list-tree"
         data-sortable-container
-        ax-load
-        ax-load-src="{{ \Filament\Support\Facades\FilamentAsset::getAlpineComponentSrc('filament-adjacency-list', 'saade/filament-adjacency-list') }}"
+        x-load
+        x-load-src="{{ \Filament\Support\Facades\FilamentAsset::getAlpineComponentSrc('filament-adjacency-list-alpine', 'saade/filament-adjacency-list') }}"
         x-data="filamentAdjacencyList({
             treeId: @js($treeId),
+            key: @js($key),
             statePath: @js($getStatePath()),
             disabled: @js($isDisabled),
             maxDepth: @js($maxDepth)
@@ -64,6 +65,7 @@
                 :is-moveable="$isMoveable"
                 :item="$item"
                 :item-state-path="$getStatePath() . '.' . $uuid"
+                :key="$key"
                 :label-key="$getLabelKey()"
                 :max-depth="$maxDepth"
                 :reorderable="$isReorderable"

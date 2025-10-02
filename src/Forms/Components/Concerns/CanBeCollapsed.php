@@ -3,7 +3,6 @@
 namespace Saade\FilamentAdjacencyList\Forms\Components\Concerns;
 
 use Closure;
-use Filament\Forms\ComponentContainer;
 
 trait CanBeCollapsed
 {
@@ -24,9 +23,9 @@ trait CanBeCollapsed
         return $this;
     }
 
-    public function isCollapsed(?ComponentContainer $item = null): bool
+    public function isCollapsed(): bool
     {
-        return (bool) $this->evaluate($this->isCollapsed, ['item' => $item]);
+        return (bool) $this->evaluate($this->isCollapsed);
     }
 
     public function collapsible(bool | Closure | null $condition = true): static

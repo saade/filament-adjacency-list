@@ -48,7 +48,7 @@ class FilamentAdjacencyListServiceProvider extends PackageServiceProvider
     protected function getAssets(): array
     {
         return [
-            AlpineComponent::make('filament-adjacency-list', __DIR__ . '/../resources/dist/filament-adjacency-list.js'),
+            AlpineComponent::make('filament-adjacency-list-alpine', __DIR__ . '/../resources/dist/filament-adjacency-list.js'),
         ];
     }
 }

@@ -1,10 +1,11 @@
-import Sortable from "sortablejs"
+import Sortable from 'sortablejs'
 
 export default function filamentAdjacencyList({
     treeId,
+    key,
     statePath,
     disabled,
-    maxDepth
+    maxDepth,
 }) {
     return {
         statePath,
@@ -18,27 +19,36 @@ export default function filamentAdjacencyList({
                 fallbackOnBody: true,
                 swapThreshold: 0.25,
                 invertSwap: true,
-                draggable: "[data-sortable-item]",
-                handle: "[data-sortable-handle]",
+                draggable: '[data-sortable-item]',
+                handle: '[data-sortable-handle]',
                 onMove: (evt) => {
-                    if (maxDepth && maxDepth >= 0 && this.getDepth(evt.related) > maxDepth) {
-                        return false;  // Prevent dragging items to a depth greater than maxDepth
+                    if (
+                        maxDepth &&
+                        maxDepth >= 0 &&
+                        this.getDepth(evt.related) > maxDepth
+                    ) {
+                        return false // Prevent dragging items to a depth greater than maxDepth
                     }
                 },
                 onSort: () => {
-                    this.$wire.dispatchFormEvent('builder::sort', this.statePath, this.sortable.toArray())
-                }
+                    this.$wire.callSchemaComponentMethod(key, 'sort', {
+                        targetStatePath: this.statePath,
+                        targetItemsStatePaths: this.sortable.toArray(),
+                    })
+                },
             })
         },
 
         getDepth(el, depth = 0) {
-            const parentElement = el.parentElement.closest('[data-sortable-item]');
+            const parentElement = el.parentElement.closest(
+                '[data-sortable-item]',
+            )
 
             if (parentElement) {
-                return this.getDepth(parentElement, ++depth);
+                return this.getDepth(parentElement, ++depth)
             }
 
-            return depth;
+            return depth
         },
     }
 }
