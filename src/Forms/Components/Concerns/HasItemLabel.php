@@ -2,29 +2,33 @@
 
 namespace Saade\FilamentAdjacencyList\Forms\Components\Concerns;
 
-use Illuminate\Contracts\Support\Htmlable;
 use Closure;
+use Illuminate\Contracts\Support\Htmlable;
 
 trait HasItemLabel
 {
-    protected string | Closure | null $itemLabel = null;
+    protected string|Closure|null $itemLabel = null;
 
-    public function itemLabel(string | Closure | null $label): static
+    public function itemLabel(string|Closure|null $label): static
     {
         $this->itemLabel = $label;
 
         return $this;
     }
 
-    public function getItemLabel(array $item, string $uuid): string | Htmlable | null
+    public function getItemLabel(array $item): string|Htmlable|null
     {
-        return $this->evaluate(
+        $label = $this->evaluate(
             $this->itemLabel,
             namedInjections: [
                 'item' => $item,
-                'key' => $uuid,
-                'uuid' => $uuid,
             ],
         );
+
+        if (! $label) {
+            return $item[$this->getLabelKey()];
+        }
+
+        return $label;
     }
 }

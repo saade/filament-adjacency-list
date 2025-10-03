@@ -52,14 +52,9 @@
 
         $hitDepthLimit = $maxDepth && substr_count($itemStatePath, $childrenKey) >= $maxDepth;
 
+        $itemLabel = $getItemLabel($item);
         $itemAction = $getItemAction($item);
         $itemUrl = $getItemUrl($item);
-
-        $itemLabel = $getItemLabel ? $getItemLabel($item, $uuid) : null;
-        if ($itemLabel === null) {
-            $itemLabel = $item[$labelKey] ?? '';
-        }
-
         $openItemUrlInNewTab = $shouldOpenItemUrlInNewTab($item);
 
         $mountArgs = ['statePath' => $itemStatePath, 'cachedRecordKey' => $uuid];
