@@ -7,16 +7,16 @@ use Illuminate\Contracts\Support\Htmlable;
 
 trait HasItemLabel
 {
-    protected string|Closure|null $itemLabel = null;
+    protected string | Closure | null $itemLabel = null;
 
-    public function itemLabel(string|Closure|null $label): static
+    public function itemLabel(string | Closure | null $label): static
     {
         $this->itemLabel = $label;
 
         return $this;
     }
 
-    public function getItemLabel(array $item): string|Htmlable|null
+    public function getItemLabel(array $item): string | Htmlable | null
     {
         $label = $this->evaluate(
             $this->itemLabel,
