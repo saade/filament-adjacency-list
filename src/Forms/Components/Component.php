@@ -14,6 +14,7 @@ abstract class Component extends Forms\Components\Field
     use Concerns\HasActions;
     use Concerns\HasChildrenKey;
     use Concerns\HasItemAction;
+    use Concerns\HasItemLabel;
     use Concerns\HasItemUrl;
     use Concerns\HasLabelKey;
     use Concerns\HasMaxDepth;

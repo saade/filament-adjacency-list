@@ -9,6 +9,7 @@
     'disabled',
     'editable',
     'getItemAction',
+    'getItemLabel',
     'getItemUrl',
     'hasRulers',
     'indentable',
@@ -51,6 +52,7 @@
 
         $hitDepthLimit = $maxDepth && substr_count($itemStatePath, $childrenKey) >= $maxDepth;
 
+        $itemLabel = $getItemLabel($item);
         $itemAction = $getItemAction($item);
         $itemUrl = $getItemUrl($item);
         $openItemUrlInNewTab = $shouldOpenItemUrlInNewTab($item);
@@ -90,7 +92,7 @@
                     class="{{ $itemClasses }}"
                     {{ \Filament\Support\generate_href_html($itemUrl, $openItemUrlInNewTab) }}
                 >
-                    <span>{{ $item[$labelKey] }}</span>
+                    <span>{{ $itemLabel }}</span>
                 </a>
             @elseif ($itemAction)
                 <button
@@ -98,11 +100,11 @@
                     class="{{ $itemClasses }}"
                     @if (!$disabled) wire:click="mountAction(@js($itemAction), @js($mountArgs), { schemaComponent: @js($key) })" @endif
                 >
-                    <span>{{ $item[$labelKey] }}</span>
+                    <span>{{ $itemLabel }}</span>
                 </button>
             @else
                 <div class="{{ $itemClasses }}">
-                    <span>{{ $item[$labelKey] }}</span>
+                    <span>{{ $itemLabel }}</span>
                 </div>
             @endif
         </div>
@@ -164,6 +166,7 @@
                 :disabled="$disabled"
                 :editable="$editable"
                 :get-item-action="$getItemAction"
+                :get-item-label="$getItemLabel"
                 :get-item-url="$getItemUrl"
                 :has-rulers="$hasRulers"
                 :indentable="$isIndentable && (!$loop->first && $loop->count > 1)"

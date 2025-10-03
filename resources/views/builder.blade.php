@@ -56,6 +56,7 @@
                 :disabled="$isDisabled"
                 :editable="$isEditable"
                 :get-item-action="$getItemAction"
+                :get-item-label="$getItemLabel"
                 :get-item-url="$getItemUrl"
                 :has-rulers="$hasRulers"
                 :indentable="$isIndentable && (!$loop->first && $loop->count > 1)"
