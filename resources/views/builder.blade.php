@@ -1,12 +1,6 @@
-<x-filament-forms::field-wrapper
-    class="fi-adjacency-list-wrapper"
-    :id="$getId()"
-    :label="$getLabel()"
-    :label-sr-only="$isLabelHidden()"
-    :hint="$getHint()"
-    :hint-icon="$getHintIcon()"
-    :required="$isRequired()"
-    :state-path="$getStatePath()"
+<x-dynamic-component
+    :component="$getFieldWrapperView()"
+    :field="$field"
 >
     @php
         $treeId = $getId();
@@ -22,11 +16,20 @@
         $isIndentable = $isIndentable();
         $isMoveable = $isMoveable();
         $isReorderable = $isReorderable();
-        
+
         $maxDepth = $getMaxDepth();
 
         $addAction = $getAction('add');
-        $itemActions = [$getAction('addChild'), $getAction('delete'), $getAction('edit'), $getAction('reorder'), $getAction('indent'), $getAction('dedent'), $getAction('moveUp'), $getAction('moveDown')];
+        $itemActions = [
+            $getAction('addChild'),
+            $getAction('delete'),
+            $getAction('edit'),
+            $getAction('reorder'),
+            $getAction('indent'),
+            $getAction('dedent'),
+            $getAction('moveUp'),
+            $getAction('moveDown'),
+        ];
     @endphp
 
     <div
@@ -88,4 +91,4 @@
             {{ $addAction(['statePath' => $getStatePath()]) }}
         @endif
     </div>
-</x-filament-forms::field-wrapper>
+</x-dynamic-component>
