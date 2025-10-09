@@ -2,9 +2,9 @@
 
 namespace Saade\FilamentAdjacencyList\Forms\Components\Actions;
 
-use Filament\Forms\Components\Actions\Action;
 use Filament\Support\Enums\ActionSize;
-use Saade\FilamentAdjacencyList\Forms\Components\AdjacencyList;
+use Illuminate\Auth\Access\AuthorizationException;
+use Saade\FilamentAdjacencyList\Forms\Components\Component;
 
 class ReorderAction extends Action
 {
@@ -23,12 +23,20 @@ class ReorderAction extends Action
 
         $this->livewireClickHandlerEnabled(false);
 
-        $this->extraAttributes(['data-sortable-handle' => 'true']);
-
-        $this->size(ActionSize::Small);
+        $this->size(ActionSize::ExtraSmall);
 
         $this->visible(
-            fn (AdjacencyList $component): bool => $component->isReorderable()
+            fn (Component $component): bool => $component->isReorderable()
         );
+
+        $this->authorize(function (Component $component, array $arguments): bool {
+            try {
+                $record = $component->getRelatedModel() ? $component->getCachedExistingRecords()->get($arguments['cachedRecordKey']) : null;
+
+                return ! $record || \Filament\authorize('reorder', $record)->allowed();
+            } catch (AuthorizationException $exception) {
+                return $exception->toResponse()->allowed();
+            }
+        });
     }
 }

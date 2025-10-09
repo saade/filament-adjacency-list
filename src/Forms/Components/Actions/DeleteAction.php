@@ -2,9 +2,9 @@
 
 namespace Saade\FilamentAdjacencyList\Forms\Components\Actions;
 
-use Filament\Forms\Components\Actions\Action;
 use Filament\Support\Enums\ActionSize;
-use Saade\FilamentAdjacencyList\Forms\Components\AdjacencyList;
+use Illuminate\Auth\Access\AuthorizationException;
+use Saade\FilamentAdjacencyList\Forms\Components\Component;
 
 class DeleteAction extends Action
 {
@@ -21,27 +21,39 @@ class DeleteAction extends Action
 
         $this->label(fn (): string => __('filament-adjacency-list::adjacency-list.actions.delete.label'));
 
+        $this->size(ActionSize::ExtraSmall);
+
         $this->modalIcon('heroicon-o-trash');
 
         $this->modalHeading(fn (): string => __('filament-adjacency-list::adjacency-list.actions.delete.modal.heading'));
 
         $this->modalSubmitActionLabel(fn (): string => __('filament-adjacency-list::adjacency-list.actions.delete.modal.actions.confirm'));
 
-        $this->action(
-            function (array $arguments, AdjacencyList $component): void {
+        $this->action(function (Component $component, array $arguments): void {
+            $record = $component->getRelatedModel() ? $component->getCachedExistingRecords()->get($arguments['cachedRecordKey']) : null;
+
+            $this->process(function (Component $component, array $arguments): void {
                 $statePath = $component->getRelativeStatePath($arguments['statePath']);
                 $items = $component->getState();
 
                 data_forget($items, $statePath);
 
                 $component->state($items);
-            }
-        );
-
-        $this->size(ActionSize::ExtraSmall);
+            }, ['record' => $record]);
+        });
 
         $this->visible(
-            fn (AdjacencyList $component): bool => $component->isDeletable()
+            fn (Component $component): bool => $component->isDeletable()
         );
+
+        $this->authorize(function (Component $component, array $arguments): bool {
+            try {
+                $record = $component->getRelatedModel() ? $component->getCachedExistingRecords()->get($arguments['cachedRecordKey']) : null;
+
+                return ! $record || \Filament\authorize('delete', $record)->allowed();
+            } catch (AuthorizationException $exception) {
+                return $exception->toResponse()->allowed();
+            }
+        });
     }
 }

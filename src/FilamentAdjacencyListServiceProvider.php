@@ -4,9 +4,7 @@ namespace Saade\FilamentAdjacencyList;
 
 use Filament\Support\Assets\AlpineComponent;
 use Filament\Support\Assets\Asset;
-use Filament\Support\Assets\Css;
 use Filament\Support\Facades\FilamentAsset;
-use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 
@@ -18,18 +16,7 @@ class FilamentAdjacencyListServiceProvider extends PackageServiceProvider
 
     public function configurePackage(Package $package): void
     {
-        $package->name(static::$name)
-            ->hasInstallCommand(function (InstallCommand $command) {
-                $command
-                    ->publishConfigFile()
-                    ->askToStarRepoOnGitHub('saade/filament-adjacency-list');
-            });
-
-        $configFileName = $package->shortName();
-
-        if (file_exists($package->basePath("/../config/{$configFileName}.php"))) {
-            $package->hasConfigFile();
-        }
+        $package->name(static::$name);
 
         if (file_exists($package->basePath('/../resources/lang'))) {
             $package->hasTranslations();
@@ -44,7 +31,6 @@ class FilamentAdjacencyListServiceProvider extends PackageServiceProvider
 
     public function packageBooted(): void
     {
-        // Asset Registration
         FilamentAsset::register(
             $this->getAssets(),
             $this->getAssetPackageName()
@@ -63,7 +49,6 @@ class FilamentAdjacencyListServiceProvider extends PackageServiceProvider
     {
         return [
             AlpineComponent::make('filament-adjacency-list', __DIR__ . '/../resources/dist/filament-adjacency-list.js'),
-            Css::make('filament-adjacency-list-styles', __DIR__ . '/../resources/dist/filament-adjacency-list.css'),
         ];
     }
 }

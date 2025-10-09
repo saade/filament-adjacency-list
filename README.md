@@ -17,6 +17,25 @@ You can install the package via composer:
 composer require saade/filament-adjacency-list
 ```
 
+> [!IMPORTANT]
+> In an effort to align with Filament's theming methodology you will need to use a custom theme to use this plugin.
+>>  If you have not set up a custom theme and are using a Panel follow the instructions in the Filament Docs first. The following applies to both the Panels Package and the standalone Forms package.
+
+1. Add the plugin's views to your `tailwind.config.js` file.
+
+```js
+content: [
+    ...
+    '<path-to-vendor>/saade/filament-adjacency-list/resources/**/*.blade.php',
+]
+```
+
+2. Rebuild your custom theme.
+
+```sh
+npm run build
+```
+
 ## Usage
 
 ```php
@@ -49,19 +68,30 @@ AdjacencyList::make('subjects')
     ->maxDepth(2)               // defaults to -1 (unlimited depth)
 ```
 
+### Triggering an action or opening a URL when clicking on an item.
+```php
+AdjacencyList::make('subjects')
+    ->itemAction('edit') // or view, delete, moveUp, indent etc ...
+    ->itemUrl(
+        fn (array $item) => YourResource::getUrl('view', ['record' => $item['id']]) // for example
+    )
+```
+
 ### Creating items without a modal.
 ```php
 AdjacencyList::make('subjects')
     ->modal(false)      // defaults to true
 ```
 
-### Disabling creation, edition, deletion, and reordering.
+### Disabling creation, edition, deletion, reordering, moving, and indenting.
 ```php
 AdjacencyList::make('subjects')
     ->addable(false)
     ->editable(false)
     ->deletable(false)
     ->reorderable(false)
+    ->moveable(false)
+    ->indentable(false)
 ```
 
 ### Customizing actions
@@ -75,13 +105,6 @@ AdjacencyList::make('subjects')
     ->deleteAction(fn (Action $action): Action => $action->requiresConfirmation())
     ->reorderAction(fn (Action $action): Action => $action->icon('heroicon-o-arrow-path-rounded-square'))
 ```
-
-> [!IMPORTANT]
-> **Reorder Action**
-> 
-> If you want to add `->extraAttributes()` to the action, you need to add the `'data-sortable-handle' => 'true'` to the array, as the action serves as a handle for SortableJS.
-> 
-> By default, clicking on the action will do anything. If you want to trigger some action on click, you need to chain `->livewireClickHandlerEnabled()` on the action.
 
 ## Relationships
 In this example, we'll be creating a Ticketing system, where tickets can be assigned to a department, and departments have subjects.
@@ -200,6 +223,36 @@ AdjacencyList::make('subdepartments')
     ->orderColumn('sort')   // or any other column
 ```
 
+## Widget
+
+The `AdjacencyListWidget` can be used to render a tree for any model with a recursive child relationship (including many-to-many graph relationships, using Staudenmeir's HasGraphRelationships trait).
+
+The simplest use case is ...
+
+```php
+class DepartmentTreeWidget extends AdjacencyListWidget
+{    
+    protected static string $relationshipName = 'descendantsAndSelf';
+
+    // If you're using a widget on an Edit or View page, the plugin will automatically set the $record for you.
+    // However, you're free to override this method to customize the record.
+    public function getModel(): Model | string | null
+    {
+        return Department::query()->where(['is_root' => true])->first();
+    }
+
+    // You can configure the widget using the same methods as the form component.
+    protected function adjacencyList(AdjacencyList $adjacencyList): AdjacencyList
+    {
+        return $adjacencyList
+            ->label('Foo')
+            ->editable()
+            ->labelKey('nombre')
+            ->childrenKey('hijos');
+    }
+}
+
+```
 ## Changelog
 
 Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
