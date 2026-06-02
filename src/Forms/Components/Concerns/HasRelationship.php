@@ -269,7 +269,7 @@ trait HasRelationship
                             $record->attributesToArray()
                     );
 
-                    $key = md5('record-' . $record->getKey());
+                    $key = md5($this->getCacheKey($record));
                     $data[$childrenKey] = $record->{$childrenKey}->mapWithKeys($cb)->toArray();
 
                     return [$key => $data];
@@ -290,6 +290,9 @@ trait HasRelationship
         return $this->evaluate($this->orderColumn);
     }
 
+    /**
+     * @throws \Exception
+     */
     public function getRelationship(): HasMany | BelongsToMany | null
     {
         $name = $this->getRelationshipName();
@@ -315,14 +318,14 @@ trait HasRelationship
 
     public function cacheRecord(Model $record): void
     {
-        $this->cachedExistingRecords?->put(md5('record-' . $record->getKey()), $record);
+        $this->cachedExistingRecords?->put(md5($this->getCacheKey($record)), $record);
 
         $this->fillFromRelationship();
     }
 
     public function deleteCachedRecord(Model $record): void
     {
-        $this->cachedExistingRecords?->forget(md5('record-' . $record->getKey()));
+        $this->cachedExistingRecords?->forget(md5($this->getCacheKey($record)));
 
         $this->fillFromRelationship();
     }
@@ -347,7 +350,21 @@ trait HasRelationship
         }
 
         return $this->cachedExistingRecords = $relationshipQuery->get()
-            ->mapWithKeys(fn (Model $record): array => [md5('record-' . $record->getKey()) => $record]);
+            ->mapWithKeys(function (Model $record): array {
+                return [md5($this->getCacheKey($record)) => $record];
+            });
+    }
+
+    private function getCacheKey(Model $record): string
+    {
+        if (method_exists($record, 'getParentKeyName')) {
+            $pivotAttribute = 'pivot_' . $record->getParentKeyName();
+            $pivotSuffix = isset($record->$pivotAttribute) ? '-' . $record->$pivotAttribute : '';
+        } else {
+            $pivotSuffix = null;
+        }
+
+        return 'record-' . $record->getKey() . $pivotSuffix;
     }
 
     public function clearCachedExistingRecords(): void
