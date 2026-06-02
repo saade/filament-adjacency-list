@@ -269,7 +269,7 @@ trait HasRelationship
                             $record->attributesToArray()
                     );
 
-                    $key = md5($this->getCacheKey($record));
+                    $key = $this->getCacheKey($record);
                     $data[$childrenKey] = $record->{$childrenKey}->mapWithKeys($cb)->toArray();
 
                     return [$key => $data];
@@ -318,14 +318,14 @@ trait HasRelationship
 
     public function cacheRecord(Model $record): void
     {
-        $this->cachedExistingRecords?->put(md5($this->getCacheKey($record)), $record);
+        $this->cachedExistingRecords?->put($this->getCacheKey($record), $record);
 
         $this->fillFromRelationship();
     }
 
     public function deleteCachedRecord(Model $record): void
     {
-        $this->cachedExistingRecords?->forget(md5($this->getCacheKey($record)));
+        $this->cachedExistingRecords?->forget($this->getCacheKey($record));
 
         $this->fillFromRelationship();
     }
@@ -351,7 +351,7 @@ trait HasRelationship
 
         return $this->cachedExistingRecords = $relationshipQuery->get()
             ->mapWithKeys(function (Model $record): array {
-                return [md5($this->getCacheKey($record)) => $record];
+                return [$this->getCacheKey($record) => $record];
             });
     }
 
@@ -364,7 +364,7 @@ trait HasRelationship
             $pivotSuffix = null;
         }
 
-        return 'record-' . $record->getKey() . $pivotSuffix;
+        return md5('record-' . $record->getKey() . $pivotSuffix);
     }
 
     public function clearCachedExistingRecords(): void
