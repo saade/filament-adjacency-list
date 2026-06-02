@@ -20,6 +20,8 @@ trait HasRelationship
 
     protected ?Collection $cachedExistingRecords = null;
 
+    protected ?string $cachedRelatedModel = null;
+
     protected string | Closure | null $orderColumn = null;
 
     protected ?Closure $modifyRelationshipQueryUsing = null;
@@ -357,7 +359,7 @@ trait HasRelationship
 
     public function getRelatedModel(): ?string
     {
-        return ($model = $this->getRelationship()?->getModel()) ? $model::class : null;
+        return $this->cachedRelatedModel ??= ($model = $this->getRelationship()?->getModel()) ? $model::class : null;
     }
 
     public function mutateRelationshipDataBeforeCreateUsing(?Closure $callback): static
