@@ -219,6 +219,9 @@ trait HasRelationship
                 } else {
                     $record->update($data);
                 }
+
+                // Clear cache
+                $component->fillFromRelationship();
             });
         });
 
