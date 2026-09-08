@@ -10,12 +10,12 @@ trait HasSchema
 {
     protected bool | Closure $hasModal = true;
 
-    protected array | Closure | null $form = null;
+    protected array | Schema | Closure | null $form = null;
 
     /**
-     * @param  array<Forms\Component> | Closure | null  $components
+     * @param  array<Forms\Component> | Schema | Closure | null  $components
      */
-    public function schema(array | Closure | null $components): static
+    public function schema(array | Schema | Closure | null $components): static
     {
         $this->form($components);
 
@@ -25,7 +25,7 @@ trait HasSchema
     /**
      * @deprecated Use `->schema()` instead.
      */
-    public function form(array | Closure | null $form): static
+    public function form(array | Schema | Closure | null $form): static
     {
         $this->form = $form;
 
