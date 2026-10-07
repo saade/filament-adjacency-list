@@ -4,8 +4,6 @@ namespace Saade\FilamentAdjacencyList\Forms\Components\Actions;
 
 use Filament\Support\Enums\Size;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
 use Saade\FilamentAdjacencyList\Forms\Components\Component;
 
 class DedentAction extends Action
@@ -27,28 +25,7 @@ class DedentAction extends Action
 
         $this->action(
             function (Component $component, array $arguments): void {
-                $statePath = $component->getItemStatePath($arguments);
-                $state = $component->getState();
-
-                $item = data_get($state, $statePath);
-                $uuid = (string) Str::afterLast($statePath, '.');
-
-                $parentPath = (string) Str::beforeLast($statePath, '.');
-                $parent = data_get($state, $parentPath);
-
-                $pathToMoveInto = (string) Str::of($statePath)->beforeLast('.')->rtrim('.children')->beforeLast('.');
-                $pathToMoveIntoData = data_get($state, $pathToMoveInto);
-
-                if (array_key_exists($pathToMoveInto, $state) || ! str_contains($pathToMoveInto, '.children')) {
-                    data_set($state, $uuid, $item);
-                } else {
-                    $pathToMoveIntoData[$uuid] = $item;
-                    data_set($state, $pathToMoveInto, $pathToMoveIntoData);
-                }
-
-                data_set($state, $parentPath, Arr::except($parent, $uuid));
-
-                $component->state($state);
+                $component->dedentItem($component->getItemStatePath($arguments));
 
                 $component->saveReorderedRelationships();
             }

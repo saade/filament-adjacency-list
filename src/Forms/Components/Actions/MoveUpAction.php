@@ -4,7 +4,6 @@ namespace Saade\FilamentAdjacencyList\Forms\Components\Actions;
 
 use Filament\Support\Enums\Size;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Support\Str;
 use Saade\FilamentAdjacencyList\Forms\Components\Component;
 
 class MoveUpAction extends Action
@@ -26,36 +25,7 @@ class MoveUpAction extends Action
 
         $this->action(
             function (Component $component, array $arguments): void {
-                $statePath = $component->getItemStatePath($arguments);
-                $state = $component->getState();
-
-                $parentPath = Str::beforeLast($statePath, '.');
-                $uuid = Str::afterLast($statePath, '.');
-
-                $parent = data_get($state, $parentPath);
-                $hasMoved = false;
-
-                if ($parentPath === $uuid) {
-                    $parent = $state;
-                }
-
-                uksort($parent, function ($_, $b) use ($uuid, &$hasMoved) {
-                    if ($b === $uuid && ! $hasMoved) {
-                        $hasMoved = true;
-
-                        return 1;
-                    }
-
-                    return 0;
-                });
-
-                if ($parentPath === $uuid) {
-                    $state = $parent;
-                } else {
-                    data_set($state, $parentPath, $parent);
-                }
-
-                $component->state($state);
+                $component->moveItem($component->getItemStatePath($arguments), -1);
 
                 $component->saveReorderedRelationships();
             }
