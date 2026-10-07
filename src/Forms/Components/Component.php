@@ -84,7 +84,11 @@ abstract class Component extends Forms\Components\Field
         $items = Arr::map($itemPaths, fn (string $itemPath): array => data_get($state, $itemPath));
 
         foreach ($itemPaths as $uuid => $itemPath) {
-            if (($this->getListPath($itemPath) !== $listPath) && (! $this->canReorderItem($uuid))) {
+            if ($this->getListPath($itemPath) === $listPath) {
+                continue;
+            }
+
+            if ((! $this->canReorderItem($uuid)) || $this->exceedsMaxDepth($this->getListDepth($listPath), $items[$uuid])) {
                 return;
             }
         }
@@ -107,6 +111,37 @@ abstract class Component extends Forms\Components\Field
         $this->state($state);
 
         $this->saveReorderedRelationships();
+    }
+
+    /**
+     * The depth of the items of a list, counted from zero at the top level.
+     */
+    public function getListDepth(string $listPath): int
+    {
+        return ($listPath === '') ? 0 : intdiv(substr_count($listPath, '.') + 1, 2);
+    }
+
+    /**
+     * @param  array<string, mixed>  $item
+     */
+    protected function exceedsMaxDepth(int $depth, array $item): bool
+    {
+        $maxDepth = $this->getMaxDepth();
+
+        return $maxDepth && (($depth + $this->getItemHeight($item)) > $maxDepth);
+    }
+
+    /**
+     * @param  array<string, mixed>  $item
+     */
+    protected function getItemHeight(array $item): int
+    {
+        $heights = array_map(
+            fn (array $child): int => $this->getItemHeight($child) + 1,
+            $item[$this->getChildrenKey()] ?? [],
+        );
+
+        return $heights ? max($heights) : 0;
     }
 
     protected function canReorderItem(string $uuid): bool
@@ -195,6 +230,10 @@ abstract class Component extends Forms\Components\Field
         $position = array_search($uuid, $keys);
 
         if (($position === false) || ($position === 0)) {
+            return;
+        }
+
+        if ($this->exceedsMaxDepth($this->getListDepth($listPath) + 1, $list[$uuid])) {
             return;
         }
 
