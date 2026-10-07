@@ -3,10 +3,14 @@
 declare(strict_types=1);
 
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Foundation\Auth\User;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Schema;
 use Livewire\Livewire;
+use Saade\FilamentAdjacencyList\Forms\Components\AdjacencyList;
 use Tests\Fixtures\Models\Category;
 use Tests\Fixtures\Pages\EditCategoryPage;
+use Tests\Fixtures\Support\LockableCategoryPolicy;
 use Tests\Fixtures\Widgets\CategoryTreeWidget;
 
 beforeEach(function () {
@@ -69,4 +73,34 @@ it('saves a new order and a new parent with the form', function () {
 it('shows the tree of a record in the widget once the widget declares its record', function () {
     Livewire::test(CategoryTreeWidget::class, ['record' => $this->root])
         ->assertSee(['Books', 'Fiction', 'Music']);
+});
+
+it('does not let a drag move a record the user may not reorder', function () {
+    Gate::policy(Category::class, LockableCategoryPolicy::class);
+    LockableCategoryPolicy::$lockedCategories = [$this->music->getKey()];
+
+    $this->actingAs(new User);
+
+    $component = Livewire::test(EditCategoryPage::class, ['record' => $this->root]);
+
+    [$books, $music] = array_keys($component->get('data.descendants'));
+    $before = $component->get('data.descendants');
+
+    $key = $component->instance()->form->getComponent(fn ($component): bool => $component instanceof AdjacencyList)->getKey();
+
+    $component->call('callSchemaComponentMethod', $key, 'sort', [
+        'targetStatePath' => "data.descendants.{$books}.children",
+        'targetItemsStatePaths' => ["data.descendants.{$music}"],
+    ]);
+
+    expect($component->get('data.descendants'))->toBe($before);
+
+    LockableCategoryPolicy::$lockedCategories = [];
+
+    $component->call('callSchemaComponentMethod', $key, 'sort', [
+        'targetStatePath' => "data.descendants.{$books}.children",
+        'targetItemsStatePaths' => ["data.descendants.{$music}"],
+    ]);
+
+    expect(array_keys($component->get("data.descendants.{$books}.children")))->toContain($music);
 });

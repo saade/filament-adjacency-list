@@ -4,6 +4,7 @@ namespace Saade\FilamentAdjacencyList\Forms\Components;
 
 use Filament\Forms;
 use Filament\Support\Components\Attributes\ExposedLivewireMethod;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Renderless;
@@ -57,6 +58,10 @@ abstract class Component extends Forms\Components\Field
             return;
         }
 
+        if ($this->isDisabled() || (! $this->isReorderable())) {
+            return;
+        }
+
         $state = $this->getState() ?? [];
 
         // A sort does not render the page again, so the paths it sends go stale.
@@ -78,6 +83,12 @@ abstract class Component extends Forms\Components\Field
 
         $items = Arr::map($itemPaths, fn (string $itemPath): array => data_get($state, $itemPath));
 
+        foreach ($itemPaths as $uuid => $itemPath) {
+            if (($this->getListPath($itemPath) !== $listPath) && (! $this->canReorderItem($uuid))) {
+                return;
+            }
+        }
+
         foreach ($itemPaths as $itemPath) {
             if ($this->getListPath($itemPath) !== $listPath) {
                 Arr::forget($state, $itemPath);
@@ -96,6 +107,21 @@ abstract class Component extends Forms\Components\Field
         $this->state($state);
 
         $this->saveReorderedRelationships();
+    }
+
+    protected function canReorderItem(string $uuid): bool
+    {
+        $record = $this->getRelatedModel() ? $this->getCachedExistingRecords()->get($uuid) : null;
+
+        if (! $record) {
+            return true;
+        }
+
+        try {
+            return \Filament\authorize('reorder', $record)->allowed();
+        } catch (AuthorizationException $exception) {
+            return $exception->toResponse()->allowed();
+        }
     }
 
     /**

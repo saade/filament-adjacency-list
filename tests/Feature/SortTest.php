@@ -153,3 +153,19 @@ it('moves an item with the buttons after it was dragged', function () {
 it('lets Alpine set up the items that are added after the page has loaded', function () {
     Livewire::test(AdjacencyListPage::class)->assertDontSeeHtml('x-ignore');
 });
+
+it('does not sort a field that is disabled or not reorderable', function (Closure $configure) {
+    AdjacencyListPage::$configure = $configure;
+
+    $component = Livewire::test(AdjacencyListPage::class)->set('data.items', sortableTree());
+
+    sortItems($component, 'data.items', ['data.items.c', 'data.items.b', 'data.items.a']);
+    sortItems($component, 'data.items.b.children', ['data.items.c']);
+
+    expect($component->get('data.items'))->toBe(sortableTree());
+
+    AdjacencyListPage::$configure = null;
+})->with([
+    'disabled' => [fn (AdjacencyList $list) => $list->disabled()],
+    'not reorderable' => [fn (AdjacencyList $list) => $list->reorderable(false)],
+]);
