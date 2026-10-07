@@ -183,7 +183,7 @@ trait HasRelationship
                     $record->{$orderColumn} = $pivotData[$orderColumn] = count(
                         data_get(
                             $component->getState(),
-                            $component->getRelativeStatePath($arguments['statePath']) . '.' . $component->getChildrenKey()
+                            $component->getItemStatePath($arguments) . '.' . $component->getChildrenKey()
                         )
                     );
                 }

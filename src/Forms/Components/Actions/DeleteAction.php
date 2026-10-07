@@ -33,7 +33,7 @@ class DeleteAction extends Action
             $record = $component->getRelatedModel() ? $component->getCachedExistingRecords()->get($arguments['cachedRecordKey']) : null;
 
             $this->process(function (Component $component, array $arguments): void {
-                $statePath = $component->getRelativeStatePath($arguments['statePath']);
+                $statePath = $component->getItemStatePath($arguments);
                 $items = $component->getState();
 
                 data_forget($items, $statePath);

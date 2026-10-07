@@ -139,6 +139,16 @@ abstract class Component extends Forms\Components\Field
         return str_contains($itemPath, '.') ? Str::beforeLast($itemPath, '.') : '';
     }
 
+    /**
+     * @param  array<string, mixed>  $arguments
+     */
+    public function getItemStatePath(array $arguments): string
+    {
+        $path = $this->getRelativeStatePath($arguments['statePath'] ?? '');
+
+        return $this->locateItem($this->getState() ?? [], $arguments['cachedRecordKey'] ?? Str::afterLast($path, '.')) ?? $path;
+    }
+
     public function getRelativeStatePath(string $path): string
     {
         return str($path)->after($this->getStatePath())->trim('.')->toString();

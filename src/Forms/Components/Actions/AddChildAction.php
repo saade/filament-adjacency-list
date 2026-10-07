@@ -59,7 +59,7 @@ class AddChildAction extends Action
             $parentRecord = $component->getRelatedModel() ? $component->getCachedExistingRecords()->get($arguments['cachedRecordKey']) : null;
 
             $this->process(function (Component $component, array $arguments, array $data): void {
-                $statePath = $component->getRelativeStatePath($arguments['statePath']);
+                $statePath = $component->getItemStatePath($arguments);
                 $uuid = (string) Str::uuid();
 
                 $items = $component->getState();

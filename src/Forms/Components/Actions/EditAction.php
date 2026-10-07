@@ -32,7 +32,7 @@ class EditAction extends Action
             function (Component $component, Schema $schema, array $arguments): Schema {
                 $schema = $component
                     ->getSchema($schema)
-                    ->statePath($arguments['statePath']);
+                    ->statePath($component->getStatePath() . '.' . $component->getItemStatePath($arguments));
 
                 if ($component->getRelatedModel()) {
                     $schema->model($component->getCachedExistingRecords()->get($arguments['cachedRecordKey']));
@@ -44,7 +44,7 @@ class EditAction extends Action
 
         $this->fillForm(
             function (Component $component, array $arguments): array {
-                return data_get($component->getState(), $component->getRelativeStatePath($arguments['statePath']), []);
+                return data_get($component->getState(), $component->getItemStatePath($arguments), []);
             }
         );
 
@@ -52,7 +52,7 @@ class EditAction extends Action
             $record = $component->getRelatedModel() ? $component->getCachedExistingRecords()->get($arguments['cachedRecordKey']) : null;
 
             $this->process(function (Component $component, array $arguments, array $data): void {
-                $statePath = $component->getRelativeStatePath($arguments['statePath']);
+                $statePath = $component->getItemStatePath($arguments);
                 $state = $component->getState();
 
                 $item = array_merge(data_get($state, $statePath), $data);

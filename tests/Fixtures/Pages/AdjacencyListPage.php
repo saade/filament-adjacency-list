@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Fixtures\Pages;
 
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\FormsComponent;
 use Filament\Schemas\Schema;
 use Saade\FilamentAdjacencyList\Forms\Components\AdjacencyList;
@@ -25,7 +26,10 @@ class AdjacencyListPage extends FormsComponent
             ->statePath('data')
             ->components([
                 AdjacencyList::make('items')
-                    ->labelKey('label'),
+                    ->labelKey('label')
+                    ->schema([
+                        TextInput::make('label'),
+                    ]),
             ]);
     }
 

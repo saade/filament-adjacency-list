@@ -27,7 +27,7 @@ class DedentAction extends Action
 
         $this->action(
             function (Component $component, array $arguments): void {
-                $statePath = $component->getRelativeStatePath($arguments['statePath']);
+                $statePath = $component->getItemStatePath($arguments);
                 $state = $component->getState();
 
                 $item = data_get($state, $statePath);

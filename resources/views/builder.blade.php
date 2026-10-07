@@ -178,7 +178,6 @@
     @endcapture
 
     <div
-        x-ignore
         class="fi-adjacency-list-tree"
         data-sortable-container
         x-load
