@@ -25,9 +25,11 @@ export default function filamentAdjacencyList({
                     if (
                         maxDepth &&
                         maxDepth >= 0 &&
-                        this.getDepth(evt.related) > maxDepth
+                        this.getListDepth(evt.to) +
+                            this.getHeight(evt.dragged) >
+                            maxDepth
                     ) {
-                        return false // Prevent dragging items to a depth greater than maxDepth
+                        return false
                     }
                 },
                 onSort: () => {
@@ -39,16 +41,33 @@ export default function filamentAdjacencyList({
             })
         },
 
-        getDepth(el, depth = 0) {
-            const parentElement = el.parentElement.closest(
-                '[data-sortable-item]',
-            )
+        getListDepth(list) {
+            let depth = 0
+            let item = list.closest('[data-sortable-item]')
 
-            if (parentElement) {
-                return this.getDepth(parentElement, ++depth)
+            while (item) {
+                depth++
+                item = item.parentElement.closest('[data-sortable-item]')
             }
 
             return depth
+        },
+
+        getHeight(item) {
+            let height = 0
+
+            item.querySelectorAll('[data-sortable-item]').forEach((child) => {
+                let depth = 0
+
+                while (child !== item) {
+                    depth++
+                    child = child.parentElement.closest('[data-sortable-item]')
+                }
+
+                height = Math.max(height, depth)
+            })
+
+            return height
         },
     }
 }
