@@ -139,6 +139,95 @@ abstract class Component extends Forms\Components\Field
         return str_contains($itemPath, '.') ? Str::beforeLast($itemPath, '.') : '';
     }
 
+    public function moveItem(string $itemPath, int $offset): void
+    {
+        $state = $this->getState() ?? [];
+        $listPath = $this->getListPath($itemPath);
+
+        $list = $this->getList($state, $listPath);
+        $keys = array_keys($list);
+        $position = array_search(Str::afterLast($itemPath, '.'), $keys);
+        $target = $position + $offset;
+
+        if (($position === false) || (! array_key_exists($target, $keys))) {
+            return;
+        }
+
+        [$keys[$position], $keys[$target]] = [$keys[$target], $keys[$position]];
+
+        $this->state($this->setList($state, $listPath, array_replace(array_flip($keys), $list)));
+    }
+
+    public function indentItem(string $itemPath): void
+    {
+        $state = $this->getState() ?? [];
+        $listPath = $this->getListPath($itemPath);
+        $uuid = Str::afterLast($itemPath, '.');
+
+        $list = $this->getList($state, $listPath);
+        $keys = array_keys($list);
+        $position = array_search($uuid, $keys);
+
+        if (($position === false) || ($position === 0)) {
+            return;
+        }
+
+        $childrenKey = $this->getChildrenKey();
+        $previous = $keys[$position - 1];
+
+        $list[$previous][$childrenKey] = [...($list[$previous][$childrenKey] ?? []), $uuid => $list[$uuid]];
+
+        $this->state($this->setList($state, $listPath, Arr::except($list, $uuid)));
+    }
+
+    public function dedentItem(string $itemPath): void
+    {
+        $state = $this->getState() ?? [];
+        $listPath = $this->getListPath($itemPath);
+
+        if ($listPath === '') {
+            return;
+        }
+
+        $uuid = Str::afterLast($itemPath, '.');
+        $list = $this->getList($state, $listPath);
+
+        if (! array_key_exists($uuid, $list)) {
+            return;
+        }
+
+        $state = $this->setList($state, $listPath, Arr::except($list, $uuid));
+
+        $parentListPath = $this->getListPath(Str::beforeLast($listPath, '.'));
+
+        $this->state($this->setList($state, $parentListPath, [...$this->getList($state, $parentListPath), $uuid => $list[$uuid]]));
+    }
+
+    /**
+     * @param  array<string, array<string, mixed>>  $state
+     * @return array<string, array<string, mixed>>
+     */
+    protected function getList(array $state, string $listPath): array
+    {
+        return ($listPath === '') ? $state : (data_get($state, $listPath) ?? []);
+    }
+
+    /**
+     * @param  array<string, array<string, mixed>>  $state
+     * @param  array<string, array<string, mixed>>  $list
+     * @return array<string, array<string, mixed>>
+     */
+    protected function setList(array $state, string $listPath, array $list): array
+    {
+        if ($listPath === '') {
+            return $list;
+        }
+
+        data_set($state, $listPath, $list);
+
+        return $state;
+    }
+
     /**
      * @param  array<string, mixed>  $arguments
      */
