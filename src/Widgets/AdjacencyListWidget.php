@@ -26,6 +26,8 @@ class AdjacencyListWidget extends Widget implements HasActions, HasForms
 
     protected static string $relationshipName = 'descendants';
 
+    public ?Model $record = null;
+
     public ?Model $model = null;
 
     public ?array $data = [];
@@ -64,6 +66,7 @@ class AdjacencyListWidget extends Widget implements HasActions, HasForms
     protected function makeAdjacencyList(): AdjacencyList
     {
         return AdjacencyList::make(static::$relationshipName)
-            ->relationship();
+            ->relationship()
+            ->saveOnReorder();
     }
 }

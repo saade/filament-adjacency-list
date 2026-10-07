@@ -34,6 +34,8 @@ trait HasRelationship
 
     protected array | Closure | null $pivotAttributes = null;
 
+    protected bool | Closure $shouldSaveOnReorder = false;
+
     public function relationship(string | Closure | null $name = null, ?Closure $modifyQueryUsing = null): static
     {
         $this->relationship = $name ?? $this->getName();
@@ -244,6 +246,27 @@ trait HasRelationship
         $this->dehydrated(false);
 
         return $this;
+    }
+
+    public function saveOnReorder(bool | Closure $condition = true): static
+    {
+        $this->shouldSaveOnReorder = $condition;
+
+        return $this;
+    }
+
+    public function shouldSaveOnReorder(): bool
+    {
+        return (bool) $this->evaluate($this->shouldSaveOnReorder);
+    }
+
+    public function saveReorderedRelationships(): void
+    {
+        if (blank($this->getRelationshipName()) || (! $this->shouldSaveOnReorder())) {
+            return;
+        }
+
+        $this->saveRelationships();
     }
 
     public function fillFromRelationship(): void

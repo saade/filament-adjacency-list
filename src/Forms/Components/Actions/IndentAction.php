@@ -59,6 +59,8 @@ class IndentAction extends Action
                 }
 
                 $component->state($state);
+
+                $component->saveReorderedRelationships();
             }
         );
 

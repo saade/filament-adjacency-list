@@ -155,10 +155,20 @@ To manage one whole tree, such as all the items of a menu, make a record for the
 
 A few things to know:
 
-- **What is saved when.** Adding, editing and deleting an item writes to the database straight away. Reordering, nesting and moving are saved when the form is saved.
+- **What is saved when.** Adding, editing and deleting an item writes to the database straight away. Reordering, nesting and moving are saved when the form is saved, unless you call [`saveOnReorder()`](#saving-moves-straight-away).
 - **The children key.** Leave `childrenKey()` at its default, `children`. It is also the name of the relationship the items' children are read from.
 - **Creating records.** The field needs a saved record to attach items to, so use it on the edit page of a resource, not on the create page.
 - **Models without the trait.** A plain `hasMany` relationship to a model that does not use `HasRecursiveRelationships` is not supported.
+
+### Saving moves straight away
+
+```php
+AdjacencyList::make('descendants')
+    ->relationship('descendants')
+    ->saveOnReorder()
+```
+
+A new order or a new parent is then written to the database as soon as an item is dragged or moved with the buttons, without waiting for the form.
 
 ### Customizing the query
 
@@ -313,18 +323,15 @@ AdjacencyList::make('items')
 
 ## Widget
 
-`AdjacencyListWidget` shows the tree of a record outside a form, for example on the view or edit page of a resource. Extend it, declare the record, and configure the field:
+`AdjacencyListWidget` shows the tree of a record outside a form, for example on the view or edit page of a resource. Extend it and configure the field:
 
 ```php
 use Filament\Forms\Components\TextInput;
-use Illuminate\Database\Eloquent\Model;
 use Saade\FilamentAdjacencyList\Forms\Components\AdjacencyList;
 use Saade\FilamentAdjacencyList\Widgets\AdjacencyListWidget;
 
 class CategoryTreeWidget extends AdjacencyListWidget
 {
-    public ?Model $record = null;
-
     protected function adjacencyList(AdjacencyList $adjacencyList): AdjacencyList
     {
         return $adjacencyList
@@ -348,7 +355,7 @@ protected function getModel(): ?Model
 
 The widget uses the `descendants` relationship. Change it with `protected static string $relationshipName`.
 
-Adding, editing and deleting in the widget are saved straight away. Reordering and nesting are not saved by the widget yet.
+There is no form to save in the widget, so everything is saved straight away: adding, editing, deleting, reordering and nesting.
 
 ## Upgrading from 3.x
 

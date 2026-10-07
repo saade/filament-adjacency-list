@@ -56,6 +56,8 @@ class MoveUpAction extends Action
                 }
 
                 $component->state($state);
+
+                $component->saveReorderedRelationships();
             }
         );
 

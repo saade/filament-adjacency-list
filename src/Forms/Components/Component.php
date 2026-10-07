@@ -4,6 +4,7 @@ namespace Saade\FilamentAdjacencyList\Forms\Components;
 
 use Filament\Forms;
 use Filament\Support\Components\Attributes\ExposedLivewireMethod;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Renderless;
 use Saade\FilamentAdjacencyList\Forms\Components\Actions\Action;
@@ -56,27 +57,86 @@ abstract class Component extends Forms\Components\Field
             return;
         }
 
-        $state = $this->getState();
-        $relativeStatePath = $this->getRelativeStatePath($targetStatePath);
+        $state = $this->getState() ?? [];
 
-        $items = [];
+        // A sort does not render the page again, so the paths it sends go stale.
+        $listPath = $this->locateList($state, $this->getRelativeStatePath($targetStatePath));
 
-        foreach ($targetItemsStatePaths as $targetItemStatePath) {
-            $targetItemRelativeStatePath = $this->getRelativeStatePath($targetItemStatePath);
-
-            $item = data_get($state, $targetItemRelativeStatePath);
-            $uuid = Str::afterLast($targetItemRelativeStatePath, '.');
-
-            $items[$uuid] = $item;
+        if ($listPath === null) {
+            return;
         }
 
-        if (! $relativeStatePath) {
-            $state = $items;
+        $itemPaths = [];
+
+        foreach ($targetItemsStatePaths as $targetItemStatePath) {
+            $uuid = Str::afterLast($this->getRelativeStatePath($targetItemStatePath), '.');
+
+            if (filled($itemPath = $this->locateItem($state, $uuid))) {
+                $itemPaths[$uuid] = $itemPath;
+            }
+        }
+
+        $items = Arr::map($itemPaths, fn (string $itemPath): array => data_get($state, $itemPath));
+
+        foreach ($itemPaths as $itemPath) {
+            if ($this->getListPath($itemPath) !== $listPath) {
+                Arr::forget($state, $itemPath);
+            }
+        }
+
+        $list = ($listPath === '') ? $state : data_get($state, $listPath, []);
+        $list = [...$items, ...array_diff_key($list, $items)];
+
+        if ($listPath === '') {
+            $state = $list;
         } else {
-            data_set($state, $relativeStatePath, $items);
+            data_set($state, $listPath, $list);
         }
 
         $this->state($state);
+
+        $this->saveReorderedRelationships();
+    }
+
+    /**
+     * @param  array<string, array<string, mixed>>  $items
+     */
+    protected function locateItem(array $items, string $uuid, string $path = ''): ?string
+    {
+        foreach ($items as $key => $item) {
+            $itemPath = ltrim("{$path}.{$key}", '.');
+
+            if ((string) $key === $uuid) {
+                return $itemPath;
+            }
+
+            $childrenKey = $this->getChildrenKey();
+
+            if (filled($found = $this->locateItem($item[$childrenKey] ?? [], $uuid, "{$itemPath}.{$childrenKey}"))) {
+                return $found;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param  array<string, array<string, mixed>>  $state
+     */
+    protected function locateList(array $state, string $path): ?string
+    {
+        if ($path === '') {
+            return '';
+        }
+
+        $itemPath = $this->locateItem($state, Str::afterLast(Str::beforeLast($path, '.'), '.'));
+
+        return filled($itemPath) ? "{$itemPath}.{$this->getChildrenKey()}" : null;
+    }
+
+    protected function getListPath(string $itemPath): string
+    {
+        return str_contains($itemPath, '.') ? Str::beforeLast($itemPath, '.') : '';
     }
 
     public function getRelativeStatePath(string $path): string

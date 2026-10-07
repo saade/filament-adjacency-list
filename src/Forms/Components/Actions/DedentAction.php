@@ -49,6 +49,8 @@ class DedentAction extends Action
                 data_set($state, $parentPath, Arr::except($parent, $uuid));
 
                 $component->state($state);
+
+                $component->saveReorderedRelationships();
             }
         );
 
