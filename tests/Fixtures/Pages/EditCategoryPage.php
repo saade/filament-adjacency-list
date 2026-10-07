@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Fixtures\Pages;
 
+use Closure;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\FormsComponent;
 use Filament\Schemas\Schema;
@@ -12,6 +13,10 @@ use Tests\Fixtures\Models\Category;
 
 class EditCategoryPage extends FormsComponent
 {
+    public static ?Closure $configureBeforeRelationship = null;
+
+    public static ?Closure $configureAfterRelationship = null;
+
     public Category $record;
 
     /** @var array<string, mixed> */
@@ -24,18 +29,30 @@ class EditCategoryPage extends FormsComponent
 
     public function form(Schema $schema): Schema
     {
+        $list = AdjacencyList::make('descendants');
+
+        if (static::$configureBeforeRelationship) {
+            (static::$configureBeforeRelationship)($list);
+        }
+
+        $list
+            ->relationship('descendants')
+            ->labelKey('name')
+            ->orderColumn('sort')
+            ->schema([
+                TextInput::make('name')->required(),
+            ]);
+
+        if (static::$configureAfterRelationship) {
+            (static::$configureAfterRelationship)($list);
+        }
+
         return $schema
             ->statePath('data')
             ->model($this->record)
             ->components([
                 TextInput::make('name'),
-                AdjacencyList::make('descendants')
-                    ->relationship('descendants')
-                    ->labelKey('name')
-                    ->orderColumn('sort')
-                    ->schema([
-                        TextInput::make('name')->required(),
-                    ]),
+                $list,
             ]);
     }
 

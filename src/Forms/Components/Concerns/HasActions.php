@@ -37,9 +37,34 @@ trait HasActions
 
     protected ?Closure $modifyMoveDownActionUsing = null;
 
+    /**
+     * @var array<string, Closure>
+     */
+    protected array $configureActionsUsing = [];
+
+    /**
+     * What the field itself needs an action to do, kept apart from the
+     * callbacks of `addAction()` and its siblings so neither replaces the other.
+     */
+    protected function configureActionUsing(string $name, Closure $callback): static
+    {
+        $this->configureActionsUsing[$name] = $callback;
+
+        return $this;
+    }
+
+    protected function configureAction(string $name, Actions\Action $action): Actions\Action
+    {
+        if ($callback = $this->configureActionsUsing[$name] ?? null) {
+            $this->evaluate($callback, ['action' => $action]);
+        }
+
+        return $action;
+    }
+
     public function getAddAction(): Actions\Action
     {
-        $action = Actions\AddAction::make();
+        $action = $this->configureAction('add', Actions\AddAction::make());
 
         if ($this->modifyAddActionUsing) {
             $action = $this->evaluate($this->modifyAddActionUsing, [
@@ -59,7 +84,7 @@ trait HasActions
 
     public function getAddChildAction(): Actions\Action
     {
-        $action = Actions\AddChildAction::make();
+        $action = $this->configureAction('addChild', Actions\AddChildAction::make());
 
         if ($this->modifyAddChildActionUsing) {
             $action = $this->evaluate($this->modifyAddChildActionUsing, [
@@ -79,7 +104,7 @@ trait HasActions
 
     public function getDeleteAction(): Actions\Action
     {
-        $action = Actions\DeleteAction::make();
+        $action = $this->configureAction('delete', Actions\DeleteAction::make());
 
         if ($this->modifydeleteActionUsing) {
             $action = $this->evaluate($this->modifydeleteActionUsing, [
@@ -99,7 +124,7 @@ trait HasActions
 
     public function getEditAction(): Actions\Action
     {
-        $action = Actions\EditAction::make();
+        $action = $this->configureAction('edit', Actions\EditAction::make());
 
         if ($this->modifyEditActionUsing) {
             $action = $this->evaluate($this->modifyEditActionUsing, [

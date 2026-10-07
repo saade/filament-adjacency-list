@@ -311,9 +311,6 @@ AdjacencyList::make('items')
     ->moveDownAction(fn (Action $action): Action => $action->label('Down'))
 ```
 
-> [!WARNING]
-> With a relationship, do not customize `addAction()`, `addChildAction()`, `editAction()` or `deleteAction()`. `relationship()` uses the same four hooks to save the items, and each hook holds one callback: a customization made before `relationship()` is discarded, and one made after it stops the items from being saved. The other actions can be customized freely.
-
 ## Widget
 
 `AdjacencyListWidget` shows the tree of a record outside a form, for example on the view or edit page of a resource. Extend it, declare the record, and configure the field:

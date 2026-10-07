@@ -96,7 +96,7 @@ trait HasRelationship
             $component->fillFromRelationship();
         });
 
-        $this->addAction(function (Action $action): void {
+        $this->configureActionUsing('add', function (Action $action): void {
             $action->using(function (Component $component, array $data): void {
                 $relationship = $component->getRelationship();
                 $model = $component->getRelatedModel();
@@ -138,7 +138,7 @@ trait HasRelationship
             });
         });
 
-        $this->addChildAction(function (Action $action): void {
+        $this->configureActionUsing('addChild', function (Action $action): void {
             $action->using(function (Component $component, Model $parentRecord, array $data, array $arguments): void {
                 $relationship = $component->getRelationship();
                 $model = $component->getRelatedModel();
@@ -189,7 +189,7 @@ trait HasRelationship
             });
         });
 
-        $this->editAction(function (Action $action): void {
+        $this->configureActionUsing('edit', function (Action $action): void {
             $action->using(function (Component $component, Model $record, array $data): void {
                 $relationship = $component->getRelationship();
 
@@ -225,7 +225,7 @@ trait HasRelationship
             });
         });
 
-        $this->deleteAction(function (Action $action): void {
+        $this->configureActionUsing('delete', function (Action $action): void {
             $action->using(function (Component $component, Model $record): void {
                 $relationship = $component->getRelationship();
 
