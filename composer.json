@@ -1,9 +1,20 @@
 {
     "name": "saade/filament-adjacency-list",
-    "description": "A Filament package to adjacency lists.",
+    "description": "A tree field for Filament: build and edit nested, hierarchical data such as menus and categories with drag and drop.",
     "keywords": [
         "saade",
         "laravel",
+        "filament",
+        "filament-plugin",
+        "tree",
+        "nested",
+        "hierarchy",
+        "adjacency-list",
+        "drag-and-drop",
+        "sortable",
+        "categories",
+        "menu",
+        "menu-builder",
         "filament-adjacency-list"
     ],
     "homepage": "https://github.com/saade/filament-adjacency-list",
