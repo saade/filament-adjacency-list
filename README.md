@@ -157,7 +157,7 @@ A few things to know:
 
 - **What is saved when.** Adding, editing and deleting an item writes to the database straight away. Reordering, nesting and moving are saved when the form is saved, unless you call [`saveOnReorder()`](#saving-moves-straight-away).
 - **The children key.** Leave `childrenKey()` at its default, `children`. It is also the name of the relationship the items' children are read from.
-- **Creating records.** The field needs a saved record to attach items to, so use it on the edit page of a resource, not on the create page.
+- **Creating records.** The field needs a saved record to attach items to, so use it on the edit page of a resource. On a create page the tree stays empty, and items cannot be added, until the record is saved.
 - **Models without the trait.** A plain `hasMany` relationship to a model that does not use `HasRecursiveRelationships` is not supported.
 
 ### Saving moves straight away

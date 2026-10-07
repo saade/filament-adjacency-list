@@ -295,7 +295,7 @@ trait HasActions
 
     public function isAddable(): bool
     {
-        if ($this->isDisabled()) {
+        if ($this->isDisabled() || $this->isWaitingForOwnerRecord()) {
             return false;
         }
 
