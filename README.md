@@ -205,7 +205,30 @@ When the items' model has a policy, the field checks it: `create` before adding,
 
 ### Graphs
 
-Models that use `HasGraphRelationships`, where an item can have several parents through a pivot table, are accepted, and `pivotAttributes()` sets the pivot values written for new items. This mode is experimental and has known problems when adding and saving items.
+A model that uses `HasGraphRelationships`, where an item can have several parents through a pivot table, works the same way:
+
+```php
+use Illuminate\Database\Eloquent\Model;
+use Staudenmeir\LaravelAdjacencyList\Eloquent\HasGraphRelationships;
+
+class Node extends Model
+{
+    use HasGraphRelationships;
+
+    public function getPivotTableName(): string
+    {
+        return 'edges';
+    }
+}
+```
+
+```php
+AdjacencyList::make('descendants')
+    ->relationship('descendants')
+    ->labelKey('name')
+```
+
+Moving an item changes the rows of the pivot table, not the items themselves. `pivotAttributes()` sets extra values to write on those rows. With `orderColumn()`, the column has to exist on both the model's table and the pivot table, since the order of an item belongs to each of its parents.
 
 ## Configuration
 

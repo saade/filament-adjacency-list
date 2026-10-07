@@ -59,33 +59,45 @@ trait HasRelationship
             $orderColumn = $component->getOrderColumn();
             $pivotAttributes = $component->getPivotAttributes();
 
-            Arr::map(
+            $getPivotValues = function (array $records) use ($recordKeyName, $orderColumn, $pivotAttributes): array {
+                $values = [];
+
+                foreach (array_values($records) as $position => $record) {
+                    $values[$record->getAttribute($recordKeyName)] = [
+                        ...$pivotAttributes,
+                        ...($orderColumn ? [$orderColumn => $position + 1] : []),
+                    ];
+                }
+
+                return $values;
+            };
+
+            $records = Arr::map(
                 $state,
-                $traverse = function (array $item, string $itemKey, array $siblings = []) use (&$traverse, &$cachedExistingRecords, $state, $relationship, $childrenKey, $recordKeyName, $orderColumn, $pivotAttributes): Model {
+                $traverse = function (array $item, string $itemKey, array $siblings = []) use (&$traverse, &$cachedExistingRecords, $state, $relationship, $childrenKey, $orderColumn, $getPivotValues): Model {
                     $record = $cachedExistingRecords->get($itemKey);
 
                     /* Update item order */
                     if ($orderColumn) {
-                        $record->{$orderColumn} = $pivotAttributes[$orderColumn] = array_search($itemKey, array_keys($siblings ?: $state)) + 1;
+                        $record->{$orderColumn} = array_search($itemKey, array_keys($siblings ?: $state)) + 1;
                     }
 
                     if ($relationship instanceof BelongsToMany) {
                         $record->save();
-                    } else {
-                        $relationship->save($record);
+
+                        $children = data_get($item, $childrenKey) ?: [];
+
+                        $record->{$childrenKey}()->sync($getPivotValues(
+                            Arr::map($children, fn (array $child, string $childKey): Model => $traverse($child, $childKey, $children)),
+                        ));
+
+                        return $record;
                     }
+
+                    $relationship->save($record);
 
                     if ($children = data_get($item, $childrenKey)) {
                         $childrenRecords = collect($children)->map(fn (array $child, string $childKey) => $traverse($child, $childKey, $children));
-
-                        if ($relationship instanceof BelongsToMany) {
-                            $record->{$childrenKey}()->syncWithPivotValues(
-                                $childrenRecords->pluck($recordKeyName),
-                                $pivotAttributes()
-                            );
-
-                            return $record;
-                        }
 
                         $record->{$childrenKey}()->saveMany($childrenRecords);
                     }
@@ -93,6 +105,10 @@ trait HasRelationship
                     return $record;
                 }
             );
+
+            if ($relationship instanceof BelongsToMany) {
+                $component->getModelInstance()->{$childrenKey}()->sync($getPivotValues($records));
+            }
 
             // Clear cache
             $component->fillFromRelationship();
@@ -175,10 +191,9 @@ trait HasRelationship
                 if ($relationship instanceof BelongsToMany) {
                     $record->save();
 
-                    $parentRecord->{$component->getChildrenKey()}()->syncWithPivotValues(
-                        [$record->getKey()],
-                        $pivotData
-                    );
+                    $parentRecord->{$component->getChildrenKey()}()->syncWithoutDetaching([
+                        $record->getKey() => $pivotData,
+                    ]);
 
                     $component->cacheRecord($record);
 
