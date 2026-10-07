@@ -40,6 +40,11 @@ return [
                     'confirm' => 'Confirmar',
                 ],
             ],
+            'notifications' => [
+                'restricted' => [
+                    'title' => 'Remova os itens abaixo deste antes de deletá-lo.',
+                ],
+            ],
         ],
 
         'toggle-children' => [

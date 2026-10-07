@@ -2,8 +2,11 @@
 
 namespace Saade\FilamentAdjacencyList\Forms\Components\Actions;
 
+use Filament\Notifications\Notification;
 use Filament\Support\Enums\Size;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Support\Str;
+use Saade\FilamentAdjacencyList\Enums\ChildrenOnDelete;
 use Saade\FilamentAdjacencyList\Forms\Components\Component;
 
 class DeleteAction extends Action
@@ -32,18 +35,52 @@ class DeleteAction extends Action
         $this->action(function (Component $component, array $arguments): void {
             $record = $component->getRelatedModel() ? $component->getCachedExistingRecords()->get($arguments['cachedRecordKey']) : null;
 
+            if ($this->isRestricted($component, $arguments)) {
+                Notification::make()
+                    ->danger()
+                    ->title(__('filament-adjacency-list::adjacency-list.actions.delete.notifications.restricted.title'))
+                    ->send();
+
+                return;
+            }
+
             $this->process(function (Component $component, array $arguments): void {
                 $statePath = $component->getItemStatePath($arguments);
                 $items = $component->getState();
 
-                data_forget($items, $statePath);
+                $item = data_get($items, $statePath);
+                $children = $item[$component->getChildrenKey()] ?? [];
+                $behavior = $component->getChildrenOnDelete();
+
+                if ($behavior === ChildrenOnDelete::MoveUp) {
+                    $uuid = Str::afterLast($statePath, '.');
+                    $listPath = str_contains($statePath, '.') ? Str::beforeLast($statePath, '.') : null;
+
+                    $list = [];
+
+                    foreach (data_get($items, $listPath) as $key => $sibling) {
+                        $list = [...$list, ...(((string) $key === $uuid) ? $children : [$key => $sibling])];
+                    }
+
+                    if ($listPath === null) {
+                        $items = $list;
+                    } else {
+                        data_set($items, $listPath, $list);
+                    }
+                } else {
+                    data_forget($items, $statePath);
+                }
+
+                if ($behavior === ChildrenOnDelete::SetNull) {
+                    $items = [...$items, ...$children];
+                }
 
                 $component->state($items);
             }, ['record' => $record]);
         });
 
         $this->visible(
-            fn (Component $component): bool => $component->isDeletable()
+            fn (Component $component, array $arguments): bool => $component->isDeletable() && (! $this->isRestricted($component, $arguments))
         );
 
         $this->authorize(function (Component $component, array $arguments): bool {
@@ -55,5 +92,19 @@ class DeleteAction extends Action
                 return $exception->toResponse()->allowed();
             }
         });
+    }
+
+    /**
+     * @param  array<string, mixed>  $arguments
+     */
+    protected function isRestricted(Component $component, array $arguments): bool
+    {
+        if ($component->getChildrenOnDelete() !== ChildrenOnDelete::Restrict) {
+            return false;
+        }
+
+        $item = data_get($component->getState(), $component->getItemStatePath($arguments));
+
+        return filled($item[$component->getChildrenKey()] ?? []);
     }
 }

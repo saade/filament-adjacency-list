@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Fixtures\Pages;
 
+use Closure;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\FormsComponent;
 use Filament\Schemas\Schema;
@@ -11,6 +12,8 @@ use Saade\FilamentAdjacencyList\Forms\Components\AdjacencyList;
 
 class AdjacencyListPage extends FormsComponent
 {
+    public static ?Closure $configure = null;
+
     /** @var array<string, mixed> */
     public array $data = [];
 
@@ -29,7 +32,8 @@ class AdjacencyListPage extends FormsComponent
                     ->labelKey('label')
                     ->schema([
                         TextInput::make('label'),
-                    ]),
+                    ])
+                    ->when(filled(static::$configure), static::$configure ?? fn () => null),
             ]);
     }
 

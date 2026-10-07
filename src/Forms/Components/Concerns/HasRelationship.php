@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Arr;
+use Saade\FilamentAdjacencyList\Enums\ChildrenOnDelete;
 use Saade\FilamentAdjacencyList\Forms\Components\Actions\Action;
 use Saade\FilamentAdjacencyList\Forms\Components\AdjacencyList;
 use Saade\FilamentAdjacencyList\Forms\Components\Component;
@@ -250,11 +251,38 @@ trait HasRelationship
                     $pivot = $record->{$relationship->getPivotAccessor()};
 
                     $pivot->delete();
+
+                    $record->delete();
+
+                    $component->deleteCachedRecord($record);
+
+                    return;
                 }
 
-                $record->delete();
+                $childrenKey = $component->getChildrenKey();
 
-                $component->deleteCachedRecord($record);
+                $record->getConnection()->transaction(function () use ($component, $record, $childrenKey): void {
+                    $parentKeyName = $record->getParentKeyName();
+
+                    $parentKey = match ($component->getChildrenOnDelete()) {
+                        ChildrenOnDelete::MoveUp => $record->getAttribute($parentKeyName),
+                        ChildrenOnDelete::SetNull => null,
+                        ChildrenOnDelete::Cascade, ChildrenOnDelete::Restrict => false,
+                    };
+
+                    if ($parentKey === false) {
+                        $record->descendants()->orderByDesc($record->getDepthName())->get()->each->delete();
+                    } else {
+                        $record->{$childrenKey}()->get()->each(
+                            fn (Model $child) => $child->setAttribute($parentKeyName, $parentKey)->save(),
+                        );
+                    }
+
+                    $record->delete();
+                });
+
+                $component->clearCachedExistingRecords();
+                $component->fillFromRelationship();
             });
         });
 

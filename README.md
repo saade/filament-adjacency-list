@@ -313,6 +313,32 @@ AdjacencyList::make('items')
 
 A new item is added straight away, without asking for its fields.
 
+### Deleting an item that has children
+
+Deleting an item deletes everything under it. Three other behaviors are available:
+
+```php
+AdjacencyList::make('items')
+    ->moveChildrenUpOnDelete()  // the children take the item's place, under its parent
+
+AdjacencyList::make('items')
+    ->nullChildrenOnDelete()  // the children are left without a parent, at the top level
+
+AdjacencyList::make('items')
+    ->restrictChildrenOnDelete() // an item that has children cannot be deleted
+```
+
+Or decide with a closure:
+
+```php
+use Saade\FilamentAdjacencyList\Enums\ChildrenOnDelete;
+
+AdjacencyList::make('items')
+    ->childrenOnDelete(fn (): ChildrenOnDelete => auth()->user()->isAdmin() ? ChildrenOnDelete::Cascade : ChildrenOnDelete::MoveUp)
+```
+
+With a relationship, the field does this itself, so the result does not depend on how the foreign key was declared. A record whose parent is set to `null` is no longer under the record being edited, so it leaves the tree.
+
 ### Turning features off
 
 ```php
@@ -379,6 +405,10 @@ protected function getModel(): ?Model
 The widget uses the `descendants` relationship. Change it with `protected static string $relationshipName`.
 
 There is no form to save in the widget, so everything is saved straight away: adding, editing, deleting, reordering and nesting.
+
+## Upgrading from 4.x
+
+- **Deleting an item deletes its children.** With a relationship, 4.x deleted only the item and left its children to the foreign key: deleted, set to `null`, refused or dangling, depending on how it was declared. 5.x deletes everything under the item itself. Call `->nullChildrenOnDelete()`, `->moveChildrenUpOnDelete()` or `->restrictChildrenOnDelete()` for [another behavior](#deleting-an-item-that-has-children).
 
 ## Upgrading from 3.x
 

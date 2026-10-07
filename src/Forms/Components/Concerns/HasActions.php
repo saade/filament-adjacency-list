@@ -3,6 +3,7 @@
 namespace Saade\FilamentAdjacencyList\Forms\Components\Concerns;
 
 use Closure;
+use Saade\FilamentAdjacencyList\Enums\ChildrenOnDelete;
 use Saade\FilamentAdjacencyList\Forms\Components\Actions;
 
 trait HasActions
@@ -18,6 +19,8 @@ trait HasActions
     protected bool | Closure $isIndentable = true;
 
     protected bool | Closure $isMoveable = true;
+
+    protected ChildrenOnDelete | Closure $childrenOnDelete = ChildrenOnDelete::Cascade;
 
     protected ?Closure $modifyAddActionUsing = null;
 
@@ -245,6 +248,42 @@ trait HasActions
         $this->modifyMoveDownActionUsing = $callback;
 
         return $this;
+    }
+
+    public function childrenOnDelete(ChildrenOnDelete | Closure $behavior): static
+    {
+        $this->childrenOnDelete = $behavior;
+
+        return $this;
+    }
+
+    public function cascadeChildrenOnDelete(): static
+    {
+        return $this->childrenOnDelete(ChildrenOnDelete::Cascade);
+    }
+
+    public function moveChildrenUpOnDelete(): static
+    {
+        return $this->childrenOnDelete(ChildrenOnDelete::MoveUp);
+    }
+
+    /**
+     * Without a relationship there is no parent to set to null, so the
+     * children go to the top level.
+     */
+    public function nullChildrenOnDelete(): static
+    {
+        return $this->childrenOnDelete(ChildrenOnDelete::SetNull);
+    }
+
+    public function restrictChildrenOnDelete(): static
+    {
+        return $this->childrenOnDelete(ChildrenOnDelete::Restrict);
+    }
+
+    public function getChildrenOnDelete(): ChildrenOnDelete
+    {
+        return $this->evaluate($this->childrenOnDelete);
     }
 
     public function addable(bool | Closure $condition = true): static
