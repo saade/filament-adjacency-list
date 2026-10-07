@@ -48,6 +48,10 @@ trait HasRelationship
         });
 
         $this->saveRelationshipsUsing(static function (AdjacencyList $component, ?array $state) {
+            if ($component->isWaitingForOwnerRecord()) {
+                return;
+            }
+
             if (! is_array($state)) {
                 $state = [];
             }
@@ -344,14 +348,21 @@ trait HasRelationship
             return null;
         }
 
-        if ($model = $this->getModelInstance()) {
-            if (! in_array(HasRecursiveRelationships::class, class_uses($model))
-            && ! in_array(HasGraphRelationships::class, class_uses($model))) {
-                throw new \Exception('The model ' . $model::class . ' must use either the ' . HasRecursiveRelationships::class . ' or ' . HasGraphRelationships::class . ' trait.');
-            }
+        if (! ($model = $this->getModelInstance())) {
+            return null;
+        }
+
+        if (! in_array(HasRecursiveRelationships::class, class_uses($model))
+        && ! in_array(HasGraphRelationships::class, class_uses($model))) {
+            throw new \Exception('The model ' . $model::class . ' must use either the ' . HasRecursiveRelationships::class . ' or ' . HasGraphRelationships::class . ' trait.');
         }
 
         return $model->{$name}();
+    }
+
+    public function isWaitingForOwnerRecord(): bool
+    {
+        return filled($this->getRelationshipName()) && (! $this->getModelInstance()?->exists);
     }
 
     public function getRelationshipName(): ?string
@@ -377,6 +388,10 @@ trait HasRelationship
     {
         if ($this->cachedExistingRecords) {
             return $this->cachedExistingRecords;
+        }
+
+        if ($this->isWaitingForOwnerRecord()) {
+            return new Collection;
         }
 
         $relationship = $this->getRelationship();
