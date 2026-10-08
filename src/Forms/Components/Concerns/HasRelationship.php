@@ -147,7 +147,7 @@ trait HasRelationship
                 }
 
                 if ($orderColumn = $component->getOrderColumn()) {
-                    $record->{$orderColumn} = $pivotData[$orderColumn] = count($component->getState());
+                    $record->{$orderColumn} = $pivotData[$orderColumn] = count($component->getState()) + 1;
                 }
 
                 if ($relationship instanceof BelongsToMany) {
@@ -195,7 +195,7 @@ trait HasRelationship
                             $component->getState(),
                             $component->getItemStatePath($arguments) . '.' . $component->getChildrenKey()
                         )
-                    );
+                    ) + 1;
                 }
 
                 if ($relationship instanceof BelongsToMany) {
