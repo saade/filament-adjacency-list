@@ -4,6 +4,7 @@ namespace Saade\FilamentAdjacencyList\Forms\Components\Concerns;
 
 use Closure;
 use Filament\Forms;
+use Filament\Schemas\Components\Component;
 use Filament\Schemas\Schema;
 
 trait HasSchema
@@ -13,11 +14,11 @@ trait HasSchema
     protected array | Schema | Closure | null $form = null;
 
     /**
-     * @param  array<Forms\Component> | Schema | Closure | null  $components
+     * @param  array<Component> | Schema | Closure | null  $components
      */
     public function schema(array | Schema | Closure | null $components): static
     {
-        $this->form($components);
+        $this->form = $components;
 
         return $this;
     }

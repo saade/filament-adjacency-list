@@ -122,7 +122,7 @@ trait HasRelationship
             $action->using(function (Component $component, array $data): void {
                 $relationship = $component->getRelationship();
                 $model = $component->getRelatedModel();
-                $pivotData = $component->getPivotAttributes() ?? [];
+                $pivotData = $component->getPivotAttributes();
 
                 if ($relationship instanceof BelongsToMany) {
                     $pivotColumns = $relationship->getPivotColumns();
@@ -165,7 +165,7 @@ trait HasRelationship
                 $relationship = $component->getRelationship();
                 $model = $component->getRelatedModel();
 
-                $pivotData = $component->getPivotAttributes() ?? [];
+                $pivotData = $component->getPivotAttributes();
 
                 if ($relationship instanceof BelongsToMany) {
                     $pivotColumns = $relationship->getPivotColumns();
@@ -217,7 +217,7 @@ trait HasRelationship
                 $translatableContentDriver = $component->getLivewire()->makeFilamentTranslatableContentDriver();
 
                 if ($relationship instanceof BelongsToMany) {
-                    $pivot = $record->{$relationship->getPivotAccessor()};
+                    $pivot = $record->getAttribute($relationship->getPivotAccessor());
 
                     $pivotColumns = $relationship->getPivotColumns();
                     $pivotData = Arr::only($data, $pivotColumns);
@@ -251,7 +251,7 @@ trait HasRelationship
                 $relationship = $component->getRelationship();
 
                 if ($relationship instanceof BelongsToMany) {
-                    $pivot = $record->{$relationship->getPivotAccessor()};
+                    $pivot = $record->getAttribute($relationship->getPivotAccessor());
 
                     $pivot->delete();
                 }
@@ -296,6 +296,7 @@ trait HasRelationship
     }
 
     /**
+     * @param  \Staudenmeir\LaravelAdjacencyList\Eloquent\Collection | \Staudenmeir\LaravelAdjacencyList\Eloquent\Graph\Collection  $records
      * @return array<array<string, mixed>>
      */
     protected function getStateFromRelatedRecords(Collection $records): array
