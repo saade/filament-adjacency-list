@@ -14,6 +14,7 @@
         $isAddable = $isAddable();
         $isCollapsible = $isCollapsible();
         $isCollapsed = $isCollapsed();
+        $shouldPersistCollapsed = $shouldPersistCollapsed();
         $isDeletable = $isDeletable();
         $isDisabled = $isDisabled();
         $isEditable = $isEditable();
@@ -70,7 +71,7 @@
             wire:key="{{ $itemStatePath }}"
             data-id="{{ $itemStatePath }}"
             data-sortable-item
-            x-data="{ isCollapsed: @js($isCollapsed) }"
+            x-data="{ isCollapsed: @if ($shouldPersistCollapsed) $persist(@js($isCollapsed)).as(@js("adjacency-list-{$statePath}-{$uuid}-isCollapsed")) @else @js($isCollapsed) @endif }"
             @class([
                 'rounded-lg mt-1.5',
                 $rootClass,

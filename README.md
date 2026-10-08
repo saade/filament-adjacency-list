@@ -295,6 +295,14 @@ AdjacencyList::make('items')
     ->collapsed() // collapsible, and collapsed when the form loads
 ```
 
+Remember which items the user collapsed, in their browser, across page loads:
+
+```php
+AdjacencyList::make('items')
+    ->collapsible()
+    ->persistCollapsed()
+```
+
 ### Rulers
 
 Draw a guide line for each level of nesting:
