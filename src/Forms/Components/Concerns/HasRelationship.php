@@ -381,8 +381,10 @@ trait HasRelationship
             return null;
         }
 
-        if (! in_array(HasRecursiveRelationships::class, class_uses($model))
-        && ! in_array(HasGraphRelationships::class, class_uses($model))) {
+        $traits = class_uses_recursive($model);
+
+        if (! in_array(HasRecursiveRelationships::class, $traits)
+        && ! in_array(HasGraphRelationships::class, $traits)) {
             throw new \Exception('The model ' . $model::class . ' must use either the ' . HasRecursiveRelationships::class . ' or ' . HasGraphRelationships::class . ' trait.');
         }
 
