@@ -26,7 +26,7 @@ trait HasItemLabel
         );
 
         if (! $label) {
-            return $item[$this->getLabelKey()];
+            return $item[$this->getLabelKey()] ?? __('filament-adjacency-list::adjacency-list.items.untitled');
         }
 
         return $label;
