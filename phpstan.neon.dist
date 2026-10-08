@@ -11,3 +11,7 @@ parameters:
             identifier: property.defaultValue
             path: src/Widgets/AdjacencyListWidget.php
             reportUnmatched: false
+        # Methods of staudenmeir's HasRecursiveRelationships trait, which a type cannot name.
+        -
+            message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model::(getParentKeyName|getDepthName|descendants)\(\)\.$#'
+            path: src/Forms/Components/Concerns/HasRelationship.php
