@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Filament\Actions\Testing\TestAction;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\Facades\Gate;
@@ -120,6 +121,26 @@ it('does not move the record itself under one of its own items', function () {
 
     expect($this->root->refresh()->parent_id)->toBeNull()
         ->and($this->music->refresh()->parent_id)->toBe($this->root->getKey());
+});
+
+it('puts a new item after its siblings', function () {
+    $component = Livewire::test(EditCategoryPage::class, ['record' => $this->root]);
+
+    $booksKey = array_key_first($component->get('data.descendants'));
+
+    $component
+        ->callAction(TestAction::make('add')->schemaComponent('descendants'), ['name' => 'Films'])
+        ->callAction(
+            TestAction::make('addChild')
+                ->schemaComponent('descendants')
+                ->arguments(['statePath' => "data.descendants.{$booksKey}", 'cachedRecordKey' => $booksKey]),
+            ['name' => 'Poetry'],
+        );
+
+    expect($this->root->children()->orderBy('sort')->pluck('sort', 'name')->all())
+        ->toBe(['Books' => 1, 'Music' => 2, 'Films' => 3])
+        ->and($this->books->children()->orderBy('sort')->pluck('sort', 'name')->all())
+        ->toBe(['Fiction' => 1, 'Poetry' => 2]);
 });
 
 it('shows the tree of a record in the widget once the widget declares its record', function () {
