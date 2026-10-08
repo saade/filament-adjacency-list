@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Schema;
 use Livewire\Livewire;
 use Saade\FilamentAdjacencyList\Forms\Components\AdjacencyList;
 use Tests\Fixtures\Models\Category;
+use Tests\Fixtures\Models\Subcategory;
 use Tests\Fixtures\Pages\EditCategoryPage;
 use Tests\Fixtures\Support\LockableCategoryPolicy;
 use Tests\Fixtures\Widgets\CategoryTreeWidget;
@@ -46,6 +47,15 @@ it('loads the descendants of the record as a tree, as the README shows', functio
     ]);
 
     $component->assertSee(['Books', 'Fiction', 'Music']);
+});
+
+it('accepts a model that gets the tree trait from a parent class', function () {
+    $component = Livewire::test(EditCategoryPage::class, ['record' => Subcategory::find($this->root->getKey())]);
+
+    expect(treeNames($component->get('data.descendants')))->toBe([
+        ['Books' => [['Fiction' => []]]],
+        ['Music' => []],
+    ]);
 });
 
 it('saves a new order and a new parent with the form', function () {
