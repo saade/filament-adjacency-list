@@ -30,6 +30,10 @@ beforeEach(function () {
     $this->fiction = $this->books->children()->create(['name' => 'Fiction', 'sort' => 1]);
 });
 
+afterEach(function () {
+    EditCategoryPage::$relationship = 'descendants';
+});
+
 function treeNames(array $items): array
 {
     return collect($items)
@@ -78,6 +82,44 @@ it('saves a new order and a new parent with the form', function () {
         ->and($this->books->refresh()->sort)->toBe(2)
         ->and($this->music->parent_id)->toBe($this->root->getKey())
         ->and($this->root->refresh()->parent_id)->toBeNull();
+});
+
+it('leaves the record itself alone when the tree includes it', function () {
+    EditCategoryPage::$relationship = 'descendantsAndSelf';
+
+    $this->root->update(['sort' => 7]);
+
+    $component = Livewire::test(EditCategoryPage::class, ['record' => $this->root]);
+
+    expect(treeNames($component->get('data.descendants')))->toBe([
+        ['Catalog' => [['Books' => [['Fiction' => []]]], ['Music' => []]]],
+    ]);
+
+    $component->call('save');
+
+    expect($this->root->refresh()->parent_id)->toBeNull()
+        ->and($this->root->sort)->toBe(7)
+        ->and($this->books->refresh()->parent_id)->toBe($this->root->getKey());
+});
+
+it('does not move the record itself under one of its own items', function () {
+    EditCategoryPage::$relationship = 'descendantsAndSelf';
+
+    $component = Livewire::test(EditCategoryPage::class, ['record' => $this->root]);
+
+    $state = $component->get('data.descendants');
+    $rootKey = array_key_first($state);
+    $root = $state[$rootKey];
+    [$booksKey, $musicKey] = array_keys($root['children']);
+
+    $music = $root['children'][$musicKey];
+    unset($root['children'][$musicKey]);
+    $music['children'] = [$rootKey => $root];
+
+    $component->set('data.descendants', [$musicKey => $music])->call('save');
+
+    expect($this->root->refresh()->parent_id)->toBeNull()
+        ->and($this->music->refresh()->parent_id)->toBe($this->root->getKey());
 });
 
 it('shows the tree of a record in the widget once the widget declares its record', function () {
