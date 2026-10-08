@@ -1,5 +1,6 @@
-.DS_Store
+**/.DS_Store
 .idea
+.phpunit.cache
 .phpunit.result.cache
 .vscode
 build
@@ -11,4 +12,3 @@ phpunit.xml
 phpstan.neon
 testbench.yaml
 vendor
-/.phpunit.cache/

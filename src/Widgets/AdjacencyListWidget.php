@@ -13,6 +13,9 @@ use Filament\Widgets\Widget;
 use Illuminate\Database\Eloquent\Model;
 use Saade\FilamentAdjacencyList\Forms\Components\AdjacencyList;
 
+/**
+ * @property-read Schema $form
+ */
 class AdjacencyListWidget extends Widget implements HasActions, HasForms
 {
     use CanBeContained;

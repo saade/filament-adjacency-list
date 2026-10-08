@@ -20,6 +20,7 @@ abstract class Component extends Forms\Components\Field
     use Concerns\HasItemUrl;
     use Concerns\HasLabelKey;
     use Concerns\HasMaxDepth;
+    use Concerns\HasRelationship;
     use Concerns\HasRulers;
     use Concerns\HasSchema;
 
