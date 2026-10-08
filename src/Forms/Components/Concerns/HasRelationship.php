@@ -62,6 +62,7 @@ trait HasRelationship
             $recordKeyName = $relationship->getRelated()->getKeyName();
             $orderColumn = $component->getOrderColumn();
             $pivotAttributes = $component->getPivotAttributes();
+            $owner = $component->getModelInstance();
 
             $getPivotValues = function (array $records) use ($recordKeyName, $orderColumn, $pivotAttributes): array {
                 $values = [];
@@ -78,11 +79,12 @@ trait HasRelationship
 
             $records = Arr::map(
                 $state,
-                $traverse = function (array $item, string $itemKey, array $siblings = []) use (&$traverse, &$cachedExistingRecords, $state, $relationship, $childrenKey, $orderColumn, $getPivotValues): Model {
+                $traverse = function (array $item, string $itemKey, array $siblings = []) use (&$traverse, &$cachedExistingRecords, $state, $relationship, $childrenKey, $orderColumn, $getPivotValues, $owner): Model {
                     $record = $cachedExistingRecords->get($itemKey);
+                    $isOwner = $record->is($owner);
 
                     /* Update item order */
-                    if ($orderColumn) {
+                    if ($orderColumn && (! $isOwner)) {
                         $record->{$orderColumn} = array_search($itemKey, array_keys($siblings ?: $state)) + 1;
                     }
 
@@ -98,10 +100,14 @@ trait HasRelationship
                         return $record;
                     }
 
-                    $relationship->save($record);
+                    if (! $isOwner) {
+                        $relationship->save($record);
+                    }
 
                     if ($children = data_get($item, $childrenKey)) {
-                        $childrenRecords = collect($children)->map(fn (array $child, string $childKey) => $traverse($child, $childKey, $children));
+                        $childrenRecords = collect($children)
+                            ->map(fn (array $child, string $childKey) => $traverse($child, $childKey, $children))
+                            ->reject(fn (Model $child): bool => $child->is($owner));
 
                         $record->{$childrenKey}()->saveMany($childrenRecords);
                     }

@@ -17,6 +17,8 @@ class EditCategoryPage extends FormsComponent
 
     public static ?Closure $configureAfterRelationship = null;
 
+    public static string $relationship = 'descendants';
+
     public Category $record;
 
     /** @var array<string, mixed> */
@@ -36,7 +38,7 @@ class EditCategoryPage extends FormsComponent
         }
 
         $list
-            ->relationship('descendants')
+            ->relationship(static::$relationship)
             ->labelKey('name')
             ->orderColumn('sort')
             ->schema([
