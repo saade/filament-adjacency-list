@@ -2,6 +2,7 @@
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/saade/filament-adjacency-list.svg?style=flat-square)](https://packagist.org/packages/saade/filament-adjacency-list)
 [![Total Downloads](https://img.shields.io/packagist/dt/saade/filament-adjacency-list.svg?style=flat-square)](https://packagist.org/packages/saade/filament-adjacency-list)
+[![Plumb score](https://plumbphp.dev/badges/saade/filament-adjacency-list/composite.svg)](https://plumbphp.dev/saade/filament-adjacency-list)
 
 A tree field for Filament. Build and edit nested, hierarchical data, such as menus, categories and page trees, with drag and drop, inside any form.
 
