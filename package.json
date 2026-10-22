@@ -8,7 +8,7 @@
     "devDependencies": {
         "@shufo/prettier-plugin-blade": "^1.16.2",
         "esbuild": "^0.28.2",
-        "prettier": "^3.9.9",
+        "prettier": "^3.9.10",
         "sortablejs": "^1.15.7"
     }
 }
